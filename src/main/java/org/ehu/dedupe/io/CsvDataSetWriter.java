@@ -20,7 +20,7 @@ public class CsvDataSetWriter {
         this.featureDerivers = featureDerivers;
     }
 
-    public void writeToCSV(List<DataRow<Object>> dataSet, String datasetFileName) {
+    public void writeToCSV(List<DataRow<Object>> dataSet, String datasetFileName) throws IOException {
 
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(datasetFileName), "UTF-8"))) {
             header(bw);
@@ -37,7 +37,6 @@ public class CsvDataSetWriter {
                 bw.write(line.toString());
                 bw.newLine();
             }
-        } catch (IOException ignored) {
         }
     }
 

@@ -44,10 +44,7 @@ public class Match {
     }
 
     public Boolean isSame() {
-        if (lev == null) {
-            return false;
-        }
-        return lev < 9 || (preProcessed && lev < 10);
+        return lev != null && (lev < 9 || preProcessed && lev < 10);
     }
 
     public boolean isTrue() {

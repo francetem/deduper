@@ -9,7 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -112,7 +111,7 @@ public class ImagePHash {
         }
         total -= dctVals[0][0];
 
-        double avg = total / (double) ((smallerSize * smallerSize) - 1);
+        double avg = total / (double) (smallerSize * smallerSize - 1);
        
                 /* 6. Further reduce the DCT.
                  * This is the magic step. Set the 64 hash bits to 0 or 1
@@ -181,7 +180,7 @@ public class ImagePHash {
                         sum += Math.cos(((2 * i + 1) / (2.0 * N)) * u * Math.PI) * Math.cos(((2 * j + 1) / (2.0 * N)) * v * Math.PI) * (f[i][j]);
                     }
                 }
-                sum *= ((c[u] * c[v]) / 4.0);
+                sum *= (c[u] * c[v]) / 4.0;
                 F[u][v] = sum;
             }
         }
