@@ -1,34 +1,14 @@
 package org.ehu.dedupe.derive.image;
 
-import org.apache.commons.text.similarity.HammingDistance;
-
 public class Match {
     private final PHashedImage left;
     private final PHashedImage right;
-    private final Integer lev;
-    private final boolean preProcessed;
+    private final Integer hamming;
 
-    private HammingDistance hamming = new HammingDistance();
-
-    public Match(PHashedImage left, PHashedImage right, boolean preProcessed) {
+    public Match(PHashedImage left, PHashedImage right, Integer hamming) {
         this.left = left;
         this.right = right;
-        this.preProcessed = preProcessed;
-        this.lev = hamming(left, right);
-    }
-
-    private Integer hamming(PHashedImage left, PHashedImage right) {
-        String leftHash = left.getHash();
-        String rightHash = right.getHash();
-        if (leftHash == null || rightHash == null) {
-            return null;
-        }
-        int leftLen = leftHash.length();
-        int rightLen = rightHash.length();
-        if (leftLen != rightLen) {
-            return Math.max(leftLen, rightLen);
-        }
-        return hamming.apply(leftHash, rightHash);
+        this.hamming = hamming;
     }
 
     public PHashedImage getLeft() {
@@ -39,16 +19,7 @@ public class Match {
         return right;
     }
 
-    public int getLev() {
-        return lev;
-    }
-
-    public Boolean isSame() {
-        return lev != null && (lev < 9 || preProcessed && lev < 10);
-    }
-
-    public boolean isTrue() {
-        Boolean same = isSame();
-        return same != null && same;
+    public int getHammingDistance() {
+        return hamming;
     }
 }

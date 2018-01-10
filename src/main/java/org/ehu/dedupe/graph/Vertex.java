@@ -10,7 +10,7 @@ public class Vertex<T> {
 
     public Vertex(T id) {
         this.id = id;
-        neighbours = new VertexSet<T>();
+        neighbours = new VertexSet<>();
     }
 
     public VertexSet<T> neighbourSet() {

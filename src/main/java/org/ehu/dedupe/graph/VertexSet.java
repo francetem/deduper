@@ -10,7 +10,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,13 +23,9 @@ import java.util.stream.Stream;
 
 public class VertexSet<T> {
 
-    public static final VertexSet EMPTY = new VertexSet<>();
+    public static final VertexSet EMPTY = new VertexSet();
 
     private Set<Vertex<T>> vertexes;
-
-    public VertexSet(Vertex<T>... vertexes) {
-        this.vertexes = Arrays.stream(vertexes).collect(Collectors.toSet());
-    }
 
     public VertexSet(Set<Vertex<T>> vertexes, Vertex<T> v) {
         Set<Vertex<T>> newVertexes = new HashSet<>(vertexes);
@@ -39,7 +34,11 @@ public class VertexSet<T> {
     }
 
     public VertexSet(Set<Vertex<T>> vertexes) {
-        this.vertexes = vertexes;
+        this.vertexes = new HashSet<>(vertexes);
+    }
+
+    public VertexSet() {
+        this.vertexes = new HashSet<>();
     }
 
     public static <T> Set<VertexSet<T>> bronKerbosch1(VertexSet<T> r, VertexSet<T> p, VertexSet<T> x) {
@@ -114,7 +113,7 @@ public class VertexSet<T> {
     }
 
     public static <T> VertexSet<T> renderGraph(Map<T, Set<T>> duplicates, Vertex<T> keyVertex) {
-        VertexSet<T> vertexSet = new VertexSet<>(keyVertex);
+        VertexSet<T> vertexSet = new VertexSet<>(Stream.of(keyVertex).collect(Collectors.toSet()));
         vertexSet.renderGraph(keyVertex, duplicates);
         return vertexSet;
     }
@@ -221,7 +220,7 @@ public class VertexSet<T> {
         Map<Vertex<T>, Integer> vertexMap = IntStream.range(0, vertices.size()).boxed().collect(Collectors.toMap(vertices::get, Function.identity()));
         for (Vertex<T> vertex : vertices) {
             for (Vertex<T> next : vertex.neighbourSet().getVertexes()) {
-                if(!vertexMap.containsKey(next)){
+                if (!vertexMap.containsKey(next)) {
                     continue;
                 }
                 ImmutablePair<T, T> key = new ImmutablePair<>(vertex.getId(), next.getId());
@@ -249,11 +248,11 @@ public class VertexSet<T> {
     }
 
     public static <T> void purge(VertexSet<T> vertexSet) {
-        for(Vertex<T> vertex: vertexSet.getVertexes()){
+        for (Vertex<T> vertex : vertexSet.getVertexes()) {
             VertexSet<T> vertexSet1 = vertex.neighbourSet();
             Set<Vertex<T>> vertexes = new HashSet<>(vertexSet1.getVertexes());
-            for(Vertex<T> vertex1: vertexes){
-                if(!vertexSet.getVertexes().contains(vertex1)){
+            for (Vertex<T> vertex1 : vertexes) {
+                if (!vertexSet.getVertexes().contains(vertex1)) {
                     vertexSet1.getVertexes().remove(vertex1);
                 }
             }

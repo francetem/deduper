@@ -42,14 +42,7 @@ public class Buckets<I> {
 
 
     public Boolean isSameBucket(I id1, I id2) {
-        if (!inverseBuckets.containsKey(id1) || !inverseBuckets.containsKey(id2)) {
-            return false;
-        }
-        return inverseBuckets.get(id1).stream().anyMatch(x -> inverseBuckets.get(id2).contains(x));
-    }
-
-    public Set<I> keySet() {
-        return inverseBuckets.keySet();
+        return inverseBuckets.containsKey(id1) && inverseBuckets.containsKey(id2) && inverseBuckets.get(id1).stream().anyMatch(x -> inverseBuckets.get(id2).contains(x));
     }
 
     public Collection<Set<I>> clusters() {

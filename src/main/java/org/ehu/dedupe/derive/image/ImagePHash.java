@@ -5,8 +5,6 @@ import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -23,7 +21,7 @@ public class ImagePHash {
     private int size = 32;
     private int smallerSize = 8;
 
-    Map<String, String> cache = new HashMap<>();
+    private Map<String, String> cache = new HashMap<>();
     private boolean onlyCache;
 
     public ImagePHash() {
@@ -43,19 +41,9 @@ public class ImagePHash {
         onlyCache = true;
     }
 
-    public int distance(String s1, String s2) {
-        int counter = 0;
-        for (int k = 0; k < s1.length(); k++) {
-            if (s1.charAt(k) != s2.charAt(k)) {
-                counter++;
-            }
-        }
-        return counter;
-    }
-
     // Returns a 'binary string' (like. 001010111011100010) which is easy to do a hamming distance on.
     public String getHash(InputStream is) throws IOException {
-    BufferedImage img = ImageIO.read(is);
+        BufferedImage img = ImageIO.read(is);
                
                 /* 1. Reduce size.
                  * Like Average Hash, pHash starts with a small image.
@@ -64,8 +52,6 @@ public class ImagePHash {
                  * because it is needed to reduce the high frequencies.
                  */
         img = resize(img, size, size);
-
-
                
                 /* 2. Reduce color.
                  * The image is reduced to a grayscale just to further simplify
@@ -87,9 +73,8 @@ public class ImagePHash {
                  * and scalars. While JPEG uses an 8x8 DCT, this algorithm uses
                  * a 32x32 DCT.
                  */
-        //long start = System.currentTimeMillis();
+
         double[][] dctVals = applyDCT(vals);
-        //System.out.println("DCT: " + (System.currentTimeMillis() - start));
                
                 /* 4. Reduce the DCT.
                  * This is the magic step. While the DCT is 32x32, just keep the
@@ -136,7 +121,7 @@ public class ImagePHash {
         return hash.toString();
     }
 
-    public BufferedImage resize(BufferedImage image, int width, int height) {
+    private BufferedImage resize(BufferedImage image, int width, int height) {
         BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = resizedImage.createGraphics();
         g.drawImage(image, 0, 0, width, height, null);
@@ -146,12 +131,12 @@ public class ImagePHash {
 
     private ColorConvertOp colorConvert = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
 
-    public BufferedImage grayscale(BufferedImage img) {
+    private BufferedImage grayscale(BufferedImage img) {
         colorConvert.filter(img, img);
         return img;
     }
 
-    public static int getBlue(BufferedImage img, int x, int y) {
+    private static int getBlue(BufferedImage img, int x, int y) {
         return (img.getRGB(x, y)) & 0xff;
     }
 
@@ -191,7 +176,7 @@ public class ImagePHash {
         if (cache.containsKey(spec)) {
             return cache.get(spec);
         }
-        if(onlyCache){
+        if (onlyCache) {
             return null;
         }
         try (InputStream is = new URL(spec).openStream()) {
@@ -204,22 +189,8 @@ public class ImagePHash {
 
     }
 
-    String getHash(BufferedImage image) throws Exception {
-        return getHash(getInputStream(image));
-    }
-
-    private InputStream getInputStream(BufferedImage resizedTarget) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ImageIO.write(resizedTarget, "jpg", os);
-        return new ByteArrayInputStream(os.toByteArray());
-    }
-
     public PHashedImage get(String image1Url) {
         return new PHashedImage(image1Url, getPHashFromUrl(image1Url));
-    }
-
-    public Match match(String image1Url, String image2Url) {
-        return get(image1Url).match(get(image2Url));
     }
 
     public Map<String, String> getCache() {
