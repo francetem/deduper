@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class ImagePHash {
     }
 
     // Returns a 'binary string' (like. 001010111011100010) which is easy to do a hamming distance on.
-    public String getHash(InputStream is) throws Exception {
+    public String getHash(InputStream is) throws IOException {
     BufferedImage img = ImageIO.read(is);
                
                 /* 1. Reduce size.
@@ -198,7 +199,7 @@ public class ImagePHash {
             String hash = getHash(is);
             cache.put(spec, hash);
             return hash;
-        } catch (Exception e) {
+        } catch (IOException e) {
             return "";
         }
 

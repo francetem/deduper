@@ -63,6 +63,6 @@ public class Neo4jStore {
             }
 
         }
-        List<JcError> errors = graph.store();
+        graph.store();
     }
 }

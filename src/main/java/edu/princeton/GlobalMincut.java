@@ -80,24 +80,6 @@ public class GlobalMincut {
     private int V;
 
     /**
-     * This helper class represents the <em>cut-of-the-phase</em>. The
-     * cut-of-the-phase is a <em>minimum s-t-cut</em> in the current graph,
-     * where {@code s} and {@code t} are the two vertices added last in the
-     * phase.
-     */
-    private class CutPhase {
-        private double weight; // the weight of the minimum s-t cut
-        private int s;         // the vertex s
-        private int t;         // the vertex t
-
-        public CutPhase(double weight, int s, int t) {
-            this.weight = weight;
-            this.s = s;
-            this.t = t;
-        }
-    }
-
-    /**
      * Computes a minimum cut of an edge-weighted graph.
      *
      * @param G the edge-weighted graph

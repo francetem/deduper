@@ -1,6 +1,6 @@
 package org.ehu.dedupe.metrics.distance;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ehu.dedupe.data.Buckets;
@@ -42,7 +42,7 @@ public class GMD {
 
     private <I> BigDecimal update(Set<I> left, Set<I> right, List<Pair<Set, Set>> pairs) {
         BigDecimal result = unitCostFunction(left, right);
-        if(!BigDecimal.ZERO.equals(result)) {
+        if (!BigDecimal.ZERO.equals(result)) {
             pairs.add(new ImmutablePair<>(left, right));
         }
         return result;
@@ -60,17 +60,17 @@ public class GMD {
             }
             Set<I> splitting = new HashSet<>(es);
             for (Integer id : tIds) {
-                Collection intersection = CollectionUtils.intersection(splitting, gt.get(id));
+                Collection<I> intersection = CollectionUtils.intersection(splitting, gt.get(id));
                 splitting = new HashSet<>(CollectionUtils.subtract(splitting, intersection));
                 cost = cost.add(fSplit.apply(new HashSet<>(intersection), splitting));
                 if (!merging.containsKey(id)) {
                     merging.put(id, new HashSet<>());
                 }
-                merging.get(id).add(new HashSet<>(intersection));
+                merging.get(id).add(new HashSet<I>(intersection));
             }
         }
-        for (Integer toMergeId : merging.keySet()) {
-            Iterator<Set<I>> iterator = merging.get(toMergeId).iterator();
+        for (Map.Entry<Integer, Set<Set<I>>> toMerge : merging.entrySet()) {
+            Iterator<Set<I>> iterator = toMerge.getValue().iterator();
             Set<I> merge = new HashSet<>(iterator.next());
             while (iterator.hasNext()) {
                 cost = cost.add(fMerge.apply(merge, iterator.next()));
