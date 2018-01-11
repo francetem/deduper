@@ -19,6 +19,7 @@ public class CsvDataSetWriterTest {
         FeatureDeriver featureDeriver = Mockito.mock(FeatureDeriver.class);
         CsvDataSetWriter csvDataSetWriter = new CsvDataSetWriter(Collections.singletonList(featureDeriver));
         BufferedWriter bufferedWriter = Mockito.mock(BufferedWriter.class);
+
         csvDataSetWriter.writeToCSV(Collections.singletonList(new DataRow<>(1, 2, true)), bufferedWriter);
 
         verify(featureDeriver).get(any());
