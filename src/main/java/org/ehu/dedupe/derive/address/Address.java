@@ -32,7 +32,7 @@ public class Address {
                 .filter(Matcher::matches)
                 .findFirst()
                 .map(matcher -> new Address(StringUtils.trim(matcher.group(2)), StringUtils.trim(matcher.group(3)), StringUtils.trim(matcher.group(1))))
-                .orElse(new Address(Range.EMPTY, null, address));
+                .orElse(new Address(null, address));
     }
 
     private static Matcher getMatcher(String address, Pattern compile) {
@@ -47,11 +47,11 @@ public class Address {
 
     private Range parse(String range) {
         if (range == null) {
-            return Range.EMPTY;
+            return null;
         }
 
         if (NumberUtils.isDigits(range)) {
-            return new Range(Integer.valueOf(range));
+            return new Range(Integer.parseInt(range));
         }
 
         if (range.contains("-")) {
@@ -62,7 +62,7 @@ public class Address {
             return getRange(range, "/");
         }
 
-        return Range.EMPTY;
+        return null;
     }
 
     private Range getRange(String range, String separator) {
@@ -70,8 +70,8 @@ public class Address {
         return new Range(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
     }
 
-    public Address(Range range, String suffix, String street) {
-        this.range = range;
+    public Address(String suffix, String street) {
+        this.range = null;
         this.suffix = suffix;
         this.street = street;
     }

@@ -13,17 +13,12 @@ import java.util.stream.Stream;
 
 public class DataRowFactory {
 
-    public <I, E extends Source<I>, D extends DataRow<I>> List<D> from(DataRowBuilder<I, E, D> dataRowBuilder) {
+    public <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> List<D> from(DataRowBuilder<I, E, D> dataRowBuilder) {
         BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction = (dataRowBuilderParam, index) -> target(dataRowBuilder, index);
         return from(dataRowBuilder, targetFunction);
     }
 
-    public <I, E extends Source<I>, D extends DataRow<I>> List<D> from(DataRowBuilder<I, E, D> dataRowBuilder, E target) {
-        BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction = (dataRowBuilderParam, index) -> Stream.of(target);
-        return from(dataRowBuilder, targetFunction);
-    }
-
-    private <I, E extends Source<I>, D extends DataRow<I>> List<D> from(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
+    private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> List<D> from(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
         return IntStream
                 .range(0, dataRowBuilder.getSources().size() - 1)
                 .boxed()
@@ -35,9 +30,9 @@ public class DataRowFactory {
                 .collect(Collectors.toList());
     }
 
-    private <I, E extends Source<I>, D extends DataRow<I>> Stream<D> toDataRow(DataRowBuilder<I, E, D> dataRowBuilder, Integer index1, Stream<E> target, E source) {
+    private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Stream<D> toDataRow(DataRowBuilder<I, E, D> dataRowBuilder, Integer index1, Stream<E> target, E source) {
         return target
-                .filter(hotelSummary -> dataRowBuilder.getBlockingPredicate().test(hotelSummary, dataRowBuilder.getSources().get(index1)))
+                .filter(targetSource -> dataRowBuilder.getBlockingPredicate().test(targetSource, dataRowBuilder.getSources().get(index1)))
                 .map(y -> {
                     I id1 = source.getId();
                     I id2 = y.getId();
@@ -53,7 +48,7 @@ public class DataRowFactory {
                 });
     }
 
-    private <I, E extends Source<I>, D extends DataRow<I>> Stream<E> target(DataRowBuilder<I, E, D> dataRowBuilder, Integer index1) {
+    private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Stream<E> target(DataRowBuilder<I, E, D> dataRowBuilder, Integer index1) {
         return IntStream.range(index1 + 1, dataRowBuilder.getSources().size())
                 .boxed()
                 .map(dataRowBuilder.getSources()::get);

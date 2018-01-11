@@ -2,27 +2,16 @@ package org.ehu.dedupe.derive.address;
 
 public class Range {
 
-    public static final Range EMPTY = new Range();
-
-    private final Integer min;
-    private final Integer max;
-
+    private final int min;
+    private final int max;
 
     public Range(Integer min, Integer max) {
-        if (min == null || max == null) {
-            throw new NullPointerException("Not allowed null values");
-        }
         this.min = min;
         this.max = max;
     }
 
-    public Range(Integer unique) {
+    public Range(int unique) {
         this(unique, unique);
-    }
-
-    private Range() {
-        min = null;
-        max = null;
     }
 
     public Integer getMin() {
@@ -37,17 +26,18 @@ public class Range {
         return min <= value && value <= max;
     }
 
-    @Override
-    public String toString() {
-        return "" + min + "-" + max;
-    }
 
     public boolean same(Range normalizedAddress) {
-        return this == normalizedAddress || (this != EMPTY && normalizedAddress != EMPTY) && (contains(normalizedAddress) || normalizedAddress.contains(this));
-
+        return this == normalizedAddress || contains(normalizedAddress) || normalizedAddress.contains(this);
     }
 
     private boolean contains(Range normalizedAddress) {
         return this.contains(normalizedAddress.getMin()) && this.contains(normalizedAddress.getMax());
     }
+
+    @Override
+    public String toString() {
+        return "" + min + "-" + max;
+    }
+
 }

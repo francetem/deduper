@@ -65,13 +65,6 @@ public class Neo4jStore {
         for (Vertex<T> vertex : x.getVertexes()) {
             GrNode startNode = toNode.get(vertex);
             for (Vertex<T> y : vertex.neighbourSet().getVertexes()) {
-                if (toNode.get(y) == null) {
-                    System.out.println(y.getId() + " doesn't exists");
-                }
-
-                if (startNode == null) {
-                    System.out.println(y.getId() + " doesn't exists");
-                }
                 GrRelation relation = graph.createRelation(RELATION_NAME, startNode, toNode.get(y));
                 Double weight = weights.get(new ImmutablePair<>(vertex.getId(), y.getId()));
                 if (weight != null) {

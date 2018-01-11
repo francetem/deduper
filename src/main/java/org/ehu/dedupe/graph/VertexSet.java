@@ -11,7 +11,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,7 @@ public class VertexSet<T> {
         this.vertexes = new HashSet<>();
     }
 
-    public static <T> Set<VertexSet<T>> bronKerbosch1(VertexSet<T> r, VertexSet<T> p, VertexSet<T> x) {
+    private static <T> Set<VertexSet<T>> bronKerbosch(VertexSet<T> r, VertexSet<T> p, VertexSet<T> x) {
         Set<VertexSet<T>> cliques = new HashSet<>();
 
         if (p.isEmpty() && x.isEmpty()) {
@@ -49,67 +48,16 @@ public class VertexSet<T> {
         }
         for (Vertex<T> v : p.getVertexes()) {
             VertexSet<T> vNeighbours = v.neighbourSet();
-            cliques.addAll(bronKerbosch1(r.union(v), p.intersect(vNeighbours), x.intersect(vNeighbours)));
-            p = p.subtract(v);
+            cliques.addAll(bronKerbosch(r.union(v), p.intersect(vNeighbours), x.intersect(vNeighbours)));
+            p = p.substract(v);
             x = x.union(v);
         }
 
         return cliques;
     }
 
-    public static <T> Set<VertexSet<T>> bronKerbosch1(VertexSet<T> vertexSet) {
-        return bronKerbosch1(empty(), vertexSet, empty());
-    }
-
-    public static <T> Collection<VertexSet<T>> normalize(Set<VertexSet<T>> vertexSets) {
-        List<VertexSet<T>> vertexes = new ArrayList<>(vertexSets);
-        Set<VertexSet<T>> results = new HashSet<>();
-        Map<VertexSet<T>, List<VertexSet<T>>> splits = new HashMap<>();
-        boolean modified = false;
-
-        Map<VertexSet<T>, Set<VertexSet<T>>> toMerge = new HashMap<>();
-        for (int i = 0; i < vertexes.size() - 1; i++) {
-            for (int j = i + 1; j < vertexes.size(); j++) {
-                VertexSet<T> first = vertexes.get(i);
-                VertexSet<T> second = vertexes.get(j);
-                VertexSet<T> intersect = first.intersect(second);
-                if (!intersect.isEmpty()) {
-                    results.add(intersect);
-                    VertexSet<T> newFirst = first.subtract(intersect);
-                    if (!newFirst.isEmpty()) {
-                        splits.put(first, Stream.of(newFirst, intersect).collect(Collectors.toList()));
-                        results.add(newFirst);
-                        modified = true;
-                        update(toMerge, intersect, newFirst);
-                    }
-
-                    VertexSet<T> newSecond = second.subtract(intersect);
-                    if (!newSecond.isEmpty()) {
-                        results.add(newSecond);
-                        splits.put(second, Stream.of(newSecond, intersect).collect(Collectors.toList()));
-                        modified = true;
-                        update(toMerge, intersect, newSecond);
-                    }
-                }
-            }
-        }
-
-        if (!modified) {
-            return vertexes;
-        } else {
-            return normalize(results);
-        }
-    }
-
-    public static <T> void update(Map<VertexSet<T>, Set<VertexSet<T>>> toMerge, VertexSet<T> intersect, VertexSet<T> newOne) {
-        if (!toMerge.containsKey(newOne)) {
-            toMerge.put(newOne, new HashSet<>());
-        }
-        if (!toMerge.containsKey(intersect)) {
-            toMerge.put(intersect, new HashSet<>());
-        }
-        toMerge.get(newOne).add(intersect);
-        toMerge.get(intersect).add(newOne);
+    public static <T> Set<VertexSet<T>> bronKerbosch(VertexSet<T> vertexSet) {
+        return bronKerbosch(empty(), vertexSet, empty());
     }
 
     public static <T> VertexSet<T> renderGraph(Map<T, Set<T>> duplicates, Vertex<T> keyVertex) {
@@ -118,7 +66,7 @@ public class VertexSet<T> {
         return vertexSet;
     }
 
-    public void renderGraph(Vertex<T> keyVertex, Map<T, Set<T>> duplicates) {
+    private void renderGraph(Vertex<T> keyVertex, Map<T, Set<T>> duplicates) {
         T id = keyVertex.getId();
         if (!duplicates.containsKey(id)) {
             return;
@@ -143,21 +91,21 @@ public class VertexSet<T> {
         return vertexes;
     }
 
-    public VertexSet<T> union(Vertex<T> v) {
+    private VertexSet<T> union(Vertex<T> v) {
         return new VertexSet<>(vertexes, v);
     }
 
-    public VertexSet<T> intersect(VertexSet<T> vertexSet) {
+    private VertexSet<T> intersect(VertexSet<T> vertexSet) {
         return new VertexSet<T>(new HashSet<>(CollectionUtils.intersection(vertexes, vertexSet.getVertexes())));
     }
 
-    public VertexSet<T> subtract(Vertex v) {
+    private VertexSet<T> substract(Vertex v) {
         Set<Vertex<T>> vertexes = new HashSet<>(this.vertexes);
         vertexes.remove(v);
         return new VertexSet<>(vertexes);
     }
 
-    public void add(Vertex<T> vertex4) {
+    void add(Vertex<T> vertex4) {
         vertexes.add(vertex4);
     }
 
@@ -178,43 +126,7 @@ public class VertexSet<T> {
         return vertexes.stream().map(Vertex::getId).collect(Collectors.toSet());
     }
 
-    public VertexSet<T> subtract(VertexSet<T> intersect) {
-        VertexSet<T> ret = this;
-        for (Vertex<T> tVertex : intersect.vertexes) {
-            ret = ret.subtract(tVertex);
-        }
-        return ret;
-    }
-
-    public VertexSet<T> union(VertexSet<T> tVertexSet) {
-        VertexSet<T> newVertexSet = this;
-        for (Vertex<T> vertex : tVertexSet.getVertexes()) {
-            newVertexSet = newVertexSet.union(vertex);
-        }
-        return newVertexSet;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (o == null || getClass() != o.getClass()) return false;
-
-        VertexSet<?> vertexSet = (VertexSet<?>) o;
-
-        return new EqualsBuilder()
-                .append(vertexes, vertexSet.vertexes)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(vertexes)
-                .toHashCode();
-    }
-
-    public static <T> Collection<VertexSet<T>> normalize2(VertexSet<T> vertexSet, Map<Pair<T, T>, Double> weights) {
+    public static <T> Collection<VertexSet<T>> normalize(VertexSet<T> vertexSet, Map<Pair<T, T>, Double> weights) {
         EdgeWeightedGraph edgeWeightedGraph = new EdgeWeightedGraph(vertexSet.size());
         List<Vertex<T>> vertices = new ArrayList<>(vertexSet.getVertexes());
         Map<Vertex<T>, Integer> vertexMap = IntStream.range(0, vertices.size()).boxed().collect(Collectors.toMap(vertices::get, Function.identity()));
@@ -247,7 +159,7 @@ public class VertexSet<T> {
         return sets;
     }
 
-    public static <T> void purge(VertexSet<T> vertexSet) {
+    private static <T> void purge(VertexSet<T> vertexSet) {
         for (Vertex<T> vertex : vertexSet.getVertexes()) {
             VertexSet<T> vertexSet1 = vertex.neighbourSet();
             Set<Vertex<T>> vertexes = new HashSet<>(vertexSet1.getVertexes());
@@ -259,14 +171,35 @@ public class VertexSet<T> {
         }
     }
 
-    public static <T> void update(Map<Pair<T, T>, Double> weights, VertexSet<T> vertexSet, Collection<VertexSet<T>> sets) {
-        Set<VertexSet<T>> vertexSets = bronKerbosch1(vertexSet);
+    private static <T> void update(Map<Pair<T, T>, Double> weights, VertexSet<T> vertexSet, Collection<VertexSet<T>> sets) {
+        Set<VertexSet<T>> vertexSets = bronKerbosch(vertexSet);
         if (vertexSets.size() > 1) {
-            sets.addAll(normalize2(vertexSet, weights));
+            sets.addAll(normalize(vertexSet, weights));
         } else {
             sets.add(vertexSet);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        VertexSet<?> vertexSet = (VertexSet<?>) o;
+
+        return new EqualsBuilder()
+                .append(vertexes, vertexSet.vertexes)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(vertexes)
+                .toHashCode();
+    }
+
 
     private int size() {
         return vertexes.size();

@@ -16,31 +16,34 @@ public class CsvDataSetWriter {
 
 
     public CsvDataSetWriter(List<FeatureDeriver> featureDerivers) {
-
         this.featureDerivers = featureDerivers;
     }
 
-    public void writeToCSV(List<DataRow<Object>> dataSet, String datasetFileName) throws IOException {
+    public void writeToCSV(List<DataRow> dataSet, String datasetFileName) throws IOException {
 
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(datasetFileName), "UTF-8"))) {
-            header(bw);
-            for (DataRow<Object> dataRowAccommodation : dataSet) {
-                StringBuilder line = new StringBuilder()
-                        .append(dataRowAccommodation.getId1())
-                        .append(CSV_SEPARATOR)
-                        .append(dataRowAccommodation.getId2())
-                        .append(CSV_SEPARATOR);
-                featureDerivers.stream()
-                        .map(feature -> feature.get(dataRowAccommodation))
-                        .forEach(value -> line.append(value).append(CSV_SEPARATOR));
-                line.append(dataRowAccommodation.isDuplicate());
-                bw.write(line.toString());
-                bw.newLine();
-            }
+            writeToCSV(dataSet, bw);
         }
     }
 
-    void header(BufferedWriter bw) throws IOException {
+    public void writeToCSV(List<DataRow> dataSet, BufferedWriter bw) throws IOException {
+        header(bw);
+        for (DataRow dataRow : dataSet) {
+            StringBuilder line = new StringBuilder()
+                    .append(dataRow.getId1())
+                    .append(CSV_SEPARATOR)
+                    .append(dataRow.getId2())
+                    .append(CSV_SEPARATOR);
+            featureDerivers.stream()
+                    .map(feature -> feature.get(dataRow))
+                    .forEach(value -> line.append(value).append(CSV_SEPARATOR));
+            line.append(dataRow.isDuplicate());
+            bw.write(line.toString());
+            bw.newLine();
+        }
+    }
+
+    private void header(BufferedWriter bw) throws IOException {
         bw.write("id1;id2;");
         for (FeatureDeriver featureDeriver : featureDerivers) {
             bw.write(featureDeriver.getName() + ";");

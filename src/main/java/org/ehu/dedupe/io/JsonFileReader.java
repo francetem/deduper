@@ -12,27 +12,22 @@ public class JsonFileReader {
 
     private static final Gson GSON = new Gson();
 
-    public static <T> T readJsonResourceFile(TypeToken<T> typeToken, String name) {
-        String data;
-        try {
-            data = readJsonResourceFile(name, JsonFileReader.class.getClassLoader());
-        } catch (IOException e) {
-            return null;
-        }
+    public static <T> T readJsonResourceFile(TypeToken<T> typeToken, String name) throws IOException {
+        ClassLoader classLoader = JsonFileReader.class.getClassLoader();
+        return readJsonResourceFile(typeToken, name, classLoader);
+    }
+
+    public static <T> T readJsonResourceFile(TypeToken<T> typeToken, String name, ClassLoader classLoader) throws IOException {
+        String data = readJsonResourceFile(name, classLoader);
         return toJson(typeToken, data);
     }
 
-    public static <T> T readJsonFile(TypeToken<T> typeToken, String name) {
-        String data;
-        try {
-            data = readJsonFile(name);
-        } catch (IOException e) {
-            return null;
-        }
+    public static <T> T readJsonFile(TypeToken<T> typeToken, String name) throws IOException {
+        String data= readJsonFile(name);
         return toJson(typeToken, data);
     }
 
-    public static <T> T toJson(TypeToken<T> typeToken, String data) {
+    private static <T> T toJson(TypeToken<T> typeToken, String data) {
         Type type = typeToken.getType();
         return GSON.fromJson(data, type);
     }

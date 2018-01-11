@@ -10,7 +10,6 @@ public class RangeTest {
     private Range range1 = new Range(1, 1);
     private Range range2 = new Range(1, 2);
 
-
     @Test
     public void testContains() throws Exception {
         assertTrue(range1.contains(1));

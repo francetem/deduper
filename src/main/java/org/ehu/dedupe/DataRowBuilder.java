@@ -5,18 +5,21 @@ import org.ehu.dedupe.data.DataRow;
 import org.ehu.dedupe.data.Source;
 import org.ehu.dedupe.derive.FeatureCalculator;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-public class DataRowBuilder<I, E extends Source<I>, D extends DataRow<I>> {
+public class DataRowBuilder<I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> {
+
+    private final Class<D> dataRowClass;
+
     private List<E> sources;
-    private BiPredicate<E, E> blockingPredicate;
-    private Buckets buckets;
-    private List<? extends FeatureCalculator> featureCalculators;
-    private Class<D> dataRowClass;
+    private BiPredicate<E, E> blockingPredicate = (E x, E y) -> true;
+    private Buckets<I> buckets = Buckets.from(Collections.emptySet());
+    private List<? extends FeatureCalculator> featureCalculators = Collections.emptyList();
 
-    public DataRowBuilder() {
-
+    public DataRowBuilder(Class<D> dataRowClass) {
+        this.dataRowClass = dataRowClass;
     }
 
     public List<E> getSources() {
@@ -56,11 +59,6 @@ public class DataRowBuilder<I, E extends Source<I>, D extends DataRow<I>> {
 
     public DataRowBuilder<I, E, D> withFeatureCalculators(List<? extends FeatureCalculator> featureCalculators) {
         this.featureCalculators = featureCalculators;
-        return this;
-    }
-
-    public DataRowBuilder<I, E, D> withDataRowClass(Class<D> datarowClass) {
-        this.dataRowClass = datarowClass;
         return this;
     }
 }
