@@ -16,7 +16,7 @@ public class BucketsTest {
     private final Set<String> cluster1 = Stream.of("r1", "r3", "r5").collect(Collectors.toSet());
     private final Set<String> cluster2 = Stream.of("r2", "r4", "r6").collect(Collectors.toSet());
 
-    private final Buckets<String> buckets = Buckets.from(cluster1, cluster2);
+    private final Buckets<String> buckets = Buckets.from(Arrays.asList(cluster1, cluster2));
 
     @Test
     public void testFrom() throws Exception {

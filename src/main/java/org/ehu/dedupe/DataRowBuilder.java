@@ -15,7 +15,7 @@ public class DataRowBuilder<I extends Comparable<I>, E extends Source<I>, D exte
 
     private List<E> sources;
     private BiPredicate<E, E> blockingPredicate = (E x, E y) -> true;
-    private Buckets<I> buckets = Buckets.from(Collections.emptySet());
+    private Buckets<I> buckets = Buckets.from(Collections.emptyList());
     private List<? extends FeatureCalculator> featureCalculators = Collections.emptyList();
 
     public DataRowBuilder(Class<D> dataRowClass) {

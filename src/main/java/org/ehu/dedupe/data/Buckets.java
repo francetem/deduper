@@ -1,9 +1,9 @@
 package org.ehu.dedupe.data;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,20 +26,19 @@ public class Buckets<I> {
         }
     }
 
-    public static <I> Buckets<I> from(Set<I>... clusters) {
+    public static <I> Buckets<I> from(List<Set<I>> clusters) {
         Map<I, Set<Integer>> inverses = new HashMap<>();
-        for (I element : Arrays.stream(clusters).flatMap(Collection::stream).collect(Collectors.toSet())) {
+        for (I element : clusters.stream().flatMap(Collection::stream).collect(Collectors.toSet())) {
             inverses.put(element, new HashSet<>());
         }
 
-        for (int i = 0; i < clusters.length; i++) {
-            for (I x : clusters[i]) {
+        for (int i = 0; i < clusters.size(); i++) {
+            for (I x : clusters.get(i)) {
                 inverses.get(x).add(i);
             }
         }
         return new Buckets<>(inverses);
     }
-
 
     public Boolean isSameBucket(I id1, I id2) {
         return inverseBuckets.containsKey(id1) && inverseBuckets.containsKey(id2) && inverseBuckets.get(id1).stream().anyMatch(x -> inverseBuckets.get(id2).contains(x));
