@@ -4,12 +4,12 @@ import java.math.BigDecimal;
 
 public class Coordinates {
 
-    private final float lat1;
-    private final float lng1;
+    private final float lat;
+    private final float lng;
 
-    public Coordinates(float lat1, float lng1) {
-        this.lat1 = lat1;
-        this.lng1 = lng1;
+    public Coordinates(float lat, float lng) {
+        this.lat = lat;
+        this.lng = lng;
     }
 
     public BigDecimal distFrom(Coordinates coordinates2) {
@@ -25,10 +25,10 @@ public class Coordinates {
     }
 
     public float getLat() {
-        return lat1;
+        return lat;
     }
 
     public float getLon() {
-        return lng1;
+        return lng;
     }
 }
