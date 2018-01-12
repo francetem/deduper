@@ -2,8 +2,6 @@ package org.ehu.dedupe;
 
 import org.ehu.dedupe.data.DataRow;
 import org.ehu.dedupe.data.Source;
-import org.ehu.dedupe.derive.CalculationResult;
-import org.ehu.dedupe.derive.FeatureCalculator;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -33,19 +31,6 @@ public class DataRowFactoryTest {
 
         public DataRowTest(Integer id1, Integer id2, Boolean duplicate) {
             super(id1, id2, duplicate);
-        }
-    }
-
-    private static final class IdentityFeatureCalculator implements FeatureCalculator {
-
-        @Override
-        public void assign(CalculationResult calculationResult) {
-            //nothing
-        }
-
-        @Override
-        public CalculationResult calculate(Object x, Object y, DataRow dataRow) {
-            return new CalculationResult(this, dataRow, null);
         }
     }
 

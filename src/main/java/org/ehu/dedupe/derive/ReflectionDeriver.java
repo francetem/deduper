@@ -9,9 +9,9 @@ import java.util.function.BiFunction;
 public class ReflectionDeriver<F, S> implements FeatureDeriver<F, S, DataRow> {
 
     private final String propertyName;
-    private final BiFunction<S, S, F> calculator;
+    private final BiFunction<S, S, Result<F>> calculator;
 
-    public ReflectionDeriver(String propertyName, BiFunction<S, S, F> calculator) {
+    public ReflectionDeriver(String propertyName, BiFunction<S, S, Result<F>> calculator) {
         this.propertyName = propertyName;
         this.calculator = calculator;
     }
@@ -37,7 +37,7 @@ public class ReflectionDeriver<F, S> implements FeatureDeriver<F, S, DataRow> {
 
     public void assign(CalculationResult calculationResult) {
         try {
-            PropertyUtils.setProperty(calculationResult.getDataRow(), getName(), calculationResult.getResult());
+            PropertyUtils.setProperty(calculationResult.getDataRow(), getName(), calculationResult.getResult().process());
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalArgumentException("not able to get property: ", e);
         }

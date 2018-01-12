@@ -5,9 +5,9 @@ import org.ehu.dedupe.data.DataRow;
 public class CalculationResult<F, D extends DataRow> {
     private final FeatureCalculator deriver;
     private final D dataRow;
-    private final F result;
+    private final Result<F> result;
 
-    public CalculationResult(FeatureCalculator deriver, D dataRow, F result) {
+    public CalculationResult(FeatureCalculator deriver, D dataRow, Result<F> result) {
         this.deriver = deriver;
         this.dataRow = dataRow;
         this.result = result;
@@ -21,7 +21,7 @@ public class CalculationResult<F, D extends DataRow> {
         return dataRow;
     }
 
-    public F getResult() {
+    public Result<F> getResult() {
         return result;
     }
 

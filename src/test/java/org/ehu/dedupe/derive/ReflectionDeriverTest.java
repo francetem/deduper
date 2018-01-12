@@ -9,16 +9,16 @@ public class ReflectionDeriverTest {
 
     @Test
     public void testGet() throws Exception {
-        ReflectionDeriver<Float, Float> latDeriver = new ReflectionDeriver<>("lat", (Float lat1, Float lat2) -> (lat1 + lat2) / 2);
+        ReflectionDeriver<Float, Float> latDeriver = new ReflectionDeriver<>("lat", (Float lat1, Float lat2) -> new SimpleResult<>((lat1 + lat2) / 2));
         LatDataRow dataRow = new LatDataRow(1, 2, true);
-        assertEquals(latDeriver.calculate(1f, 3f, dataRow).getResult(), 2f);
+        assertEquals(latDeriver.calculate(1f, 3f, dataRow).getResult().process(), 2f);
     }
 
     public static class LatDataRow extends DataRow {
 
         private Float lat;
 
-        public LatDataRow(Comparable id1, Comparable id2, Boolean duplicate) {
+        public LatDataRow(Comparable<Integer> id1, Comparable<Integer> id2, Boolean duplicate) {
             super(id1, id2, duplicate);
             this.lat = lat;
         }
