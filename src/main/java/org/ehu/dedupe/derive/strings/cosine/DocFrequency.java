@@ -1,4 +1,4 @@
-package org.ehu.dedupe.derive.strings;
+package org.ehu.dedupe.derive.strings.cosine;
 
 import java.util.HashMap;
 import java.util.Map;

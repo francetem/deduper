@@ -1,4 +1,4 @@
-package org.ehu.dedupe.derive.strings;
+package org.ehu.dedupe.derive.strings.cosine;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.ehu.dedupe.derive.Result;

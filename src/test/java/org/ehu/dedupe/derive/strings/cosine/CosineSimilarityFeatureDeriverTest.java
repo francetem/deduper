@@ -1,4 +1,4 @@
-package org.ehu.dedupe.derive.strings;
+package org.ehu.dedupe.derive.strings.cosine;
 
 import org.ehu.dedupe.data.DataRow;
 import org.ehu.dedupe.derive.CalculationResult;
