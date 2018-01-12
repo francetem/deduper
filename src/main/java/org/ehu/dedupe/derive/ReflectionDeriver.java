@@ -31,16 +31,15 @@ public class ReflectionDeriver<F, S> implements FeatureDeriver<F, S, DataRow> {
     }
 
     @Override
-    public void calculate(S o1, S o2, DataRow dataRow) {
+    public CalculationResult<F, DataRow> calculate(S o1, S o2, DataRow dataRow) {
+        return new CalculationResult<F, DataRow>(this, dataRow, calculator.apply(o1, o2));
+    }
+
+    public void assign(CalculationResult calculationResult) {
         try {
-            PropertyUtils.setProperty(dataRow, getName(), calculator.apply(o1, o2));
+            PropertyUtils.setProperty(calculationResult.getDataRow(), getName(), calculationResult.getResult());
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalArgumentException("not able to get property: ", e);
         }
-    }
-
-    @Override
-    public void postProcess(DataRow dataRow) {
-
     }
 }

@@ -6,12 +6,12 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class ReflectionDeriverTest {
+
     @Test
     public void testGet() throws Exception {
         ReflectionDeriver<Float, Float> latDeriver = new ReflectionDeriver<>("lat", (Float lat1, Float lat2) -> (lat1 + lat2) / 2);
         LatDataRow dataRow = new LatDataRow(1, 2, true);
-        latDeriver.calculate(1f, 3f, dataRow);
-        assertEquals(latDeriver.get(dataRow), 2f);
+        assertEquals(latDeriver.calculate(1f, 3f, dataRow).getResult(), 2f);
     }
 
     public static class LatDataRow extends DataRow {
