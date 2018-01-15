@@ -2,6 +2,7 @@ package org.ehu.dedupe.derive.strings.cosine;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.ehu.dedupe.derive.Result;
+import org.ehu.dedupe.derive.strings.DocFrequency;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -71,7 +72,6 @@ public class CosineResult implements Result<BigDecimal> {
         return words2;
     }
 
-
     private double complete(Set<String> words, int size1) {
         double magnitude = 0.0;
         for (String word : words) {
@@ -84,6 +84,6 @@ public class CosineResult implements Result<BigDecimal> {
     }
 
     private double idf(String word) {
-        return Math.log((double) docFrequency.docFrequency.keySet().size() / (double) docFrequency.docFrequency.getOrDefault(word, 0));
+        return Math.log((double) docFrequency.getSize() / (double) docFrequency.get(word).orElse(0));
     }
 }

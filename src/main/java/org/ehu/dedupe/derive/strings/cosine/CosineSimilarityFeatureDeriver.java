@@ -1,6 +1,7 @@
 package org.ehu.dedupe.derive.strings.cosine;
 
 import org.ehu.dedupe.derive.ReflectionDeriver;
+import org.ehu.dedupe.derive.strings.DocFrequency;
 
 import java.math.BigDecimal;
 import java.util.HashSet;

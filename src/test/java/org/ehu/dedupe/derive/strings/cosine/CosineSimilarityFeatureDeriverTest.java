@@ -2,6 +2,7 @@ package org.ehu.dedupe.derive.strings.cosine;
 
 import org.ehu.dedupe.data.DataRow;
 import org.ehu.dedupe.derive.CalculationResult;
+import org.ehu.dedupe.derive.strings.DocFrequency;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
