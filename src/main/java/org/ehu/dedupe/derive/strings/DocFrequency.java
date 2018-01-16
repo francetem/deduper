@@ -1,10 +1,12 @@
 package org.ehu.dedupe.derive.strings;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 public class DocFrequency {
@@ -13,7 +15,13 @@ public class DocFrequency {
     public DocFrequency() {
     }
 
-    public void documentCount(Set<String> words) {
+    public Set<String> document(String doc) {
+        Set<String> words1 = words(doc);
+        documentCount(words1);
+        return words1;
+    }
+
+    void documentCount(Set<String> words) {
         for (String word : words) {
             if (docFrequency.containsKey(word)) {
                 docFrequency.put(word, docFrequency.get(word) + 1);
@@ -21,6 +29,15 @@ public class DocFrequency {
                 docFrequency.put(word, 1);
             }
         }
+    }
+
+    private static Set<String> words(String name) {
+        StringTokenizer tokenizer = new StringTokenizer(name);
+        Set<String> words1 = new HashSet<>();
+        while (tokenizer.hasMoreTokens()) {
+            words1.add(tokenizer.nextToken());
+        }
+        return words1;
     }
 
     public int getSize() {

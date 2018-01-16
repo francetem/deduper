@@ -4,30 +4,21 @@ import org.ehu.dedupe.derive.ReflectionDeriver;
 import org.ehu.dedupe.derive.strings.DocFrequency;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.function.Function;
 
 public class CosineSimilarityFeatureDeriver<S> extends ReflectionDeriver<BigDecimal, S> {
 
     public CosineSimilarityFeatureDeriver(String propertyName, Function<S, String> getter, DocFrequency docFrequency) {
         super(propertyName, (x, y) -> {
-            Set<String> words1 = words(getter.apply(x));
-            Set<String> words2 = words(getter.apply(y));
-            docFrequency.documentCount(words1);
-            docFrequency.documentCount(words2);
+            String xGet = getter.apply(x);
+            String yGet = getter.apply(y);
+
+            Set<String> words1 = docFrequency.document(xGet);
+            Set<String> words2 = docFrequency.document(yGet);
+
             return new CosineResult(words1, words2, docFrequency);
         });
-    }
-
-    private static Set<String> words(String name) {
-        StringTokenizer tokenizer = new StringTokenizer(name);
-        Set<String> words1 = new HashSet<>();
-        while (tokenizer.hasMoreTokens()) {
-            words1.add(tokenizer.nextToken());
-        }
-        return words1;
     }
 
 }
