@@ -5,7 +5,6 @@ import org.ehu.dedupe.derive.strings.DocFrequency;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 
 public class CosineSimilarityFeatureDeriver<S> extends ReflectionDeriver<BigDecimal, S> {
