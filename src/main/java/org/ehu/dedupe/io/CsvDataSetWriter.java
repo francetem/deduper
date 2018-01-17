@@ -29,18 +29,22 @@ public class CsvDataSetWriter {
     public void writeToCSV(List<? extends DataRow> dataSet, BufferedWriter bw) throws IOException {
         header(bw);
         for (DataRow dataRow : dataSet) {
-            StringBuilder line = new StringBuilder()
-                    .append(dataRow.getId1())
-                    .append(CSV_SEPARATOR)
-                    .append(dataRow.getId2())
-                    .append(CSV_SEPARATOR);
-            featureDerivers.stream()
-                    .map(feature -> feature.get(dataRow))
-                    .forEach(value -> line.append(value).append(CSV_SEPARATOR));
-            line.append(dataRow.isDuplicate());
-            bw.write(line.toString());
-            bw.newLine();
+            writeLine(bw, dataRow);
         }
+    }
+
+    private void writeLine(BufferedWriter bw, DataRow dataRow) throws IOException {
+        StringBuilder line = new StringBuilder()
+                .append(dataRow.getId1())
+                .append(CSV_SEPARATOR)
+                .append(dataRow.getId2())
+                .append(CSV_SEPARATOR);
+        featureDerivers.stream()
+                .map(feature -> feature.get(dataRow))
+                .forEach(value -> line.append(value).append(CSV_SEPARATOR));
+        line.append(dataRow.isDuplicate());
+        bw.write(line.toString());
+        bw.newLine();
     }
 
     private void header(BufferedWriter bw) throws IOException {

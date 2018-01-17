@@ -8,14 +8,14 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 public class CosineResult implements Result<BigDecimal> {
-    private final Set<String> words1;
-    private final Set<String> words2;
+    private final List<String> words1;
+    private final List<String> words2;
     private DocFrequency docFrequency;
 
-    public CosineResult(Set<String> words1, Set<String> words2, DocFrequency docFrequency) {
+    public CosineResult(List<String> words1, List<String> words2, DocFrequency docFrequency) {
         this.words1 = words1;
         this.words2 = words2;
         this.docFrequency = docFrequency;
@@ -23,8 +23,8 @@ public class CosineResult implements Result<BigDecimal> {
 
     @Override
     public BigDecimal process() {
-        Set<String> words1 = getWords1();
-        Set<String> words2 = getWords2();
+        List<String> words1 = getWords1();
+        List<String> words2 = getWords2();
         Collection<String> intersection = CollectionUtils.intersection(words1, words2);
 
         if (intersection.isEmpty()) {
@@ -64,15 +64,15 @@ public class CosineResult implements Result<BigDecimal> {
         }
     }
 
-    public Set<String> getWords1() {
+    public List<String> getWords1() {
         return words1;
     }
 
-    public Set<String> getWords2() {
+    public List<String> getWords2() {
         return words2;
     }
 
-    private double complete(Set<String> words, int size1) {
+    private double complete(List<String> words, int size1) {
         double magnitude = 0.0;
         for (String word : words) {
             double idf = idf(word);
