@@ -16,4 +16,11 @@ public class IntersectionDeriverTest {
         assertNull(deriver.calculate("any", "none", null).getResult().process());
     }
 
+    @Test
+    public void testDeriverOnNull() {
+        IntersectionDeriver<String, String> deriver = new IntersectionDeriver<>("any", t -> "none".equals(t) ? null : t);
+        assertEquals(deriver.calculate("any", "any", null).getResult().process(), "any");
+        assertNull(deriver.calculate("none", "any", null).getResult().process());
+    }
+
 }
