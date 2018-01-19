@@ -19,7 +19,7 @@ public class Match {
         return right;
     }
 
-    public int getHammingDistance() {
+    public Integer getHammingDistance() {
         return hamming;
     }
 }

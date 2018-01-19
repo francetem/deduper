@@ -44,4 +44,8 @@ public class DataRow<I extends Comparable<I>> {
     public int hashCode() {
         return id1.compareTo(id2) > 0 ? Objects.hash(id1, id2, duplicate) : Objects.hash(id2, id1, duplicate);
     }
+
+    public Object implementor() {
+        return this;
+    }
 }

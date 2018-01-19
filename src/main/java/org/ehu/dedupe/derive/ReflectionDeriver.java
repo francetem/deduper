@@ -19,10 +19,14 @@ public class ReflectionDeriver<F, S> implements FeatureDeriver<F, S, DataRow> {
     @Override
     public F get(DataRow dataRow) {
         try {
-            return (F) PropertyUtils.getProperty(dataRow, getName());
+            return (F) PropertyUtils.getProperty(dataRow.implementor(), getName());
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new IllegalArgumentException("not able to get property: ", e);
+            throw new IllegalArgumentException(wrongPropertyMessage("not able to get property: "), e);
         }
+    }
+
+    public String wrongPropertyMessage(String s) {
+        return s + getName();
     }
 
     @Override
@@ -37,9 +41,13 @@ public class ReflectionDeriver<F, S> implements FeatureDeriver<F, S, DataRow> {
 
     public void assign(CalculationResult calculationResult) {
         try {
-            PropertyUtils.setProperty(calculationResult.getDataRow(), getName(), calculationResult.getResult().process());
+            set(calculationResult.getDataRow().implementor(), calculationResult.getResult().process());
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new IllegalArgumentException("not able to get property: ", e);
+            throw new IllegalArgumentException(wrongPropertyMessage("not able to set property: "), e);
         }
+    }
+
+    public void set(Object dataRow, Object process) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        PropertyUtils.setProperty(dataRow, getName(), process);
     }
 }

@@ -1,6 +1,7 @@
 package org.ehu.dedupe.derive;
 
 import org.ehu.dedupe.data.DataRow;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -14,21 +15,15 @@ public class ReflectionDeriverTest {
         assertEquals(latDeriver.calculate(1f, 3f, dataRow).getResult().process(), 2f);
     }
 
-    public static class LatDataRow extends DataRow {
-
-        private Float lat;
-
-        public LatDataRow(Comparable<Integer> id1, Comparable<Integer> id2, Boolean duplicate) {
-            super(id1, id2, duplicate);
-            this.lat = lat;
-        }
-
-        public Float getLat() {
-            return lat;
-        }
-
-        public void setLat(Float lat) {
-            this.lat = lat;
+    @Test
+    public void testAssignErrorMessage() throws Exception {
+        ReflectionDeriver<String, String> deriver = new ReflectionDeriver<>("any", (x, y) -> null);
+        try {
+            deriver.assign(new CalculationResult<>(deriver, new DataRow<>(2, 4, true), new SimpleResult<>("result")));
+            Assert.fail();
+        } catch(IllegalArgumentException e){
+            assertEquals(e.getMessage(), "not able to set property: any");
         }
     }
+
 }
