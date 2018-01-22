@@ -14,8 +14,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Random;
+import java.util.logging.Logger;
 
 public class WekaUtils {
+
+    private static final Logger LOGGER = Logger.getLogger("weka");
 
     public static Instances getCsvInstances(String datasetFileName) throws IOException {
         CSVLoader csvLoader = new CSVLoader();
@@ -38,7 +41,7 @@ public class WekaUtils {
         fc.setClassifier(randomForest);
         fc.buildClassifier(instances);
 
-        System.out.println(randomForest.toString());
+        LOGGER.info(randomForest.toString());
 
         return fc;
     }
