@@ -7,6 +7,7 @@ import org.ehu.dedupe.derive.FeatureCalculator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -21,6 +22,17 @@ public class DataRowFactory {
     }
 
     private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Set<D> from(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
+
+        List<CalculationResult<FeatureCalculator, D>> calculationResults = calculateParallel(dataRowBuilder, targetFunction);
+
+        return calculationResults
+                .parallelStream()
+                .peek(CalculationResult::assign)
+                .map(CalculationResult::getDataRow)
+                .collect(Collectors.toSet());
+    }
+
+    private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> List<CalculationResult<FeatureCalculator, D>> calculateParallel(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
         return IntStream
                 .range(0, dataRowBuilder.getSources().size() - 1)
                 .boxed()
@@ -28,10 +40,7 @@ public class DataRowFactory {
                 .flatMap(index1 -> {
                     Stream<E> target = targetFunction.apply(dataRowBuilder, index1);
                     return toDataRow(dataRowBuilder, index1, target, dataRowBuilder.getSources().get(index1));
-                })
-                .peek(CalculationResult::assign)
-                .map(CalculationResult::getDataRow)
-                .collect(Collectors.toSet());
+                }).collect(Collectors.toList());
     }
 
     private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Stream<CalculationResult<FeatureCalculator, D>> toDataRow(DataRowBuilder<I, E, D> dataRowBuilder, Integer index1, Stream<E> target, E source) {

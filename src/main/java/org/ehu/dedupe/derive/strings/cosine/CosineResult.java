@@ -84,6 +84,6 @@ public class CosineResult implements Result<BigDecimal> {
     }
 
     private double idf(String word) {
-        return Math.log((double) docFrequency.getSize() / (double) docFrequency.get(word).orElse(0));
+        return Math.log((double) docFrequency.getSize() / (double) docFrequency.get(word));
     }
 }

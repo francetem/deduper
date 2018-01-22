@@ -1,16 +1,18 @@
 package org.ehu.dedupe.derive.strings;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 public class DocFrequency {
 
-    private Map<String, Integer> docFrequency = new HashMap<>();
+    public static final LongAdder EMPTY = new LongAdder();
+
+    private Map<String, LongAdder> docFrequency = new ConcurrentHashMap<>();
 
     public DocFrequency() {
     }
@@ -22,13 +24,7 @@ public class DocFrequency {
     }
 
     void documentCount(List<String> words) {
-        for (String word : words) {
-            if (docFrequency.containsKey(word)) {
-                docFrequency.put(word, docFrequency.get(word) + 1);
-            } else {
-                docFrequency.put(word, 1);
-            }
-        }
+        words.forEach(word -> docFrequency.computeIfAbsent(word, x -> new LongAdder()).increment());
     }
 
     private static List<String> words(String name) {
@@ -44,11 +40,11 @@ public class DocFrequency {
         return docFrequency.size();
     }
 
-    public Optional<Integer> get(String word) {
-        return Optional.ofNullable(docFrequency.get(word));
+    public Integer get(String word) {
+        return docFrequency.getOrDefault(word, EMPTY).intValue();
     }
 
     public List<String> orderedByFrequency() {
-        return docFrequency.keySet().stream().sorted((x, y) -> docFrequency.get(y) - docFrequency.get(x)).collect(Collectors.toList());
+        return docFrequency.keySet().stream().sorted((x, y) -> docFrequency.get(y).intValue() - docFrequency.get(x).intValue()).collect(Collectors.toList());
     }
 }
