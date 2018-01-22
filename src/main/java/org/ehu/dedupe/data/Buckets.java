@@ -1,10 +1,12 @@
 package org.ehu.dedupe.data;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,10 @@ public class Buckets<I> {
 
     public Boolean isSameBucket(I id1, I id2) {
         return inverseBuckets.containsKey(id1) && inverseBuckets.containsKey(id2) && inverseBuckets.get(id1).stream().anyMatch(x -> inverseBuckets.get(id2).contains(x));
+    }
+
+    public Set<I> duplicates(I id) {
+        return inverseBuckets.containsKey(id) ? inverseBuckets.get(id).stream().flatMap(x -> buckets.get(x).stream()).filter(x -> !Objects.equals(id, x)).collect(Collectors.toSet()) : Collections.emptySet();
     }
 
     public Collection<Set<I>> clusters() {

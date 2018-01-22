@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Collection;
 import java.util.List;
 
 public class CsvDataSetWriter {
@@ -19,14 +20,14 @@ public class CsvDataSetWriter {
         this.featureDerivers = featureDerivers;
     }
 
-    public void writeToCSV(List<? extends DataRow> dataSet, String datasetFileName) throws IOException {
+    public void writeToCSV(Collection<? extends DataRow> dataSet, String datasetFileName) throws IOException {
 
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(datasetFileName), "UTF-8"))) {
             writeToCSV(dataSet, bw);
         }
     }
 
-    public void writeToCSV(List<? extends DataRow> dataSet, BufferedWriter bw) throws IOException {
+    public void writeToCSV(Collection<? extends DataRow> dataSet, BufferedWriter bw) throws IOException {
         header(bw);
         for (DataRow dataRow : dataSet) {
             writeLine(bw, dataRow);

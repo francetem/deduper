@@ -35,8 +35,7 @@ public class DataRow<I extends Comparable<I>> {
     }
 
     private boolean equals(DataRow left, DataRow dataRow) {
-        return (Objects.equals(left.id1, dataRow.id1) &&
-                Objects.equals(left.id2, dataRow.id2) || Objects.equals(left.id1, dataRow.id2) && Objects.equals(left.id2, dataRow.id1)) &&
+        return (Objects.equals(left.id1, dataRow.id1) && Objects.equals(left.id2, dataRow.id2) || Objects.equals(left.id1, dataRow.id2) && Objects.equals(left.id2, dataRow.id1)) &&
                 Objects.equals(left.duplicate, dataRow.duplicate);
     }
 
