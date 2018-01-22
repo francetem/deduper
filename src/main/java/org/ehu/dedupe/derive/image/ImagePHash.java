@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
  * pHash-like image hash.
@@ -21,7 +22,7 @@ public class ImagePHash {
     private int size = 32;
     private int smallerSize = 8;
 
-    private Map<String, String> cache = new HashMap<>();
+    private Map<String, PHashedImage> cache = new HashMap<>();
     private boolean onlyCache;
 
     public ImagePHash() {
@@ -35,7 +36,11 @@ public class ImagePHash {
         initCoefficients();
     }
 
-    public ImagePHash(Map<String, String> cache) {
+    public static ImagePHash from(Map<String, String> cache) {
+        return new ImagePHash(cache.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (Map.Entry<String, String> x) -> new PHashedImage(x.getKey(), x.getValue()))));
+    }
+
+    public ImagePHash(Map<String, PHashedImage> cache) {
         this();
         this.cache = cache;
         onlyCache = true;
@@ -172,7 +177,7 @@ public class ImagePHash {
         return F;
     }
 
-    public String getPHashFromUrl(String spec) {
+    public PHashedImage getPHashFromUrl(String spec) {
         if (cache.containsKey(spec)) {
             return cache.get(spec);
         }
@@ -181,19 +186,20 @@ public class ImagePHash {
         }
         try (InputStream is = new URL(spec).openStream()) {
             String hash = getHash(is);
-            cache.put(spec, hash);
-            return hash;
+            PHashedImage pHashedImage = new PHashedImage(spec, hash);
+            cache.put(spec, pHashedImage);
+            return pHashedImage;
         } catch (IOException e) {
-            return "";
+            return PHashedImage.EMPTY;
         }
 
     }
 
     public PHashedImage get(String image1Url) {
-        return new PHashedImage(image1Url, getPHashFromUrl(image1Url));
+        return getPHashFromUrl(image1Url);
     }
 
-    public Map<String, String> getCache() {
+    public Map<String, PHashedImage> getCache() {
         return cache;
     }
 }

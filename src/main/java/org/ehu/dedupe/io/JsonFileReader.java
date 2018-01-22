@@ -23,7 +23,7 @@ public class JsonFileReader {
     }
 
     public static <T> T readJsonFile(TypeToken<T> typeToken, String name) throws IOException {
-        String data= readJsonFile(name);
+        String data = readJsonFile(name);
         return toJson(typeToken, data);
     }
 

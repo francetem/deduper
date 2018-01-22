@@ -19,7 +19,7 @@ public class ImagePHashTest {
     public void testGet() throws Exception {
         String url = "url";
         String pHash = "11111111111111111111";
-        ImagePHash imagePHash = new ImagePHash(Collections.singletonMap(url, pHash));
+        ImagePHash imagePHash = new ImagePHash(Collections.singletonMap(url, new PHashedImage(url, pHash)));
         assertEquals(imagePHash.get(url).getHash(), pHash);
     }
 

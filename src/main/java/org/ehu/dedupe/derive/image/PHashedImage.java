@@ -4,6 +4,8 @@ import org.apache.commons.text.similarity.HammingDistance;
 
 public class PHashedImage {
 
+    public static final PHashedImage EMPTY = new PHashedImage("", "");
+
     private HammingDistance hamming = new HammingDistance();
 
     private final String url;
