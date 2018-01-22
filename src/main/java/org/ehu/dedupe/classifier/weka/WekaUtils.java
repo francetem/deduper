@@ -31,11 +31,15 @@ public class WekaUtils {
         removeByName.setExpression("^id.$");
 
         RandomForest randomForest = new RandomForest();
+        randomForest.setComputeAttributeImportance(true);
 
         FilteredClassifier fc = new FilteredClassifier();
         fc.setFilter(removeByName);
         fc.setClassifier(randomForest);
         fc.buildClassifier(instances);
+
+        System.out.println(randomForest.toString());
+
         return fc;
     }
 
