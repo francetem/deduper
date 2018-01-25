@@ -16,7 +16,7 @@ public class WekaUtilsTest {
     @Test
     public void testCrossValidateModel() throws Exception {
         Instances csvInstances = WekaUtils.getCsvInstances("./src/test/resources/org/ehu/dedupe/classifier/weka/myDataSet.csv");
-        AbstractClassifier classifier = WekaUtils.buildModel(csvInstances);
+        AbstractClassifier classifier = WekaUtils.buildDefaultClassifier(csvInstances);
         Evaluation evaluation = WekaUtils.crossValidateModel(csvInstances, classifier);
 
         assertEquals(evaluation.toMatrixString(), "=== Confusion Matrix ===\n" +

@@ -29,19 +29,24 @@ public class WekaUtils {
         return dataSet;
     }
 
-    public static AbstractClassifier buildModel(Instances instances) throws Exception {
-        RemoveByName removeByName = new RemoveByName();
-        removeByName.setExpression("^id.$");
+    public static AbstractClassifier buildDefaultClassifier(Instances instances) throws Exception {
 
         RandomForest randomForest = new RandomForest();
         randomForest.setComputeAttributeImportance(true);
 
+        return buildClassifier(instances, randomForest);
+    }
+
+    public static AbstractClassifier buildClassifier(Instances instances, AbstractClassifier classifier) throws Exception {
+        RemoveByName removeByName = new RemoveByName();
+        removeByName.setExpression("^id.$");
+
         FilteredClassifier fc = new FilteredClassifier();
         fc.setFilter(removeByName);
-        fc.setClassifier(randomForest);
+        fc.setClassifier(classifier);
         fc.buildClassifier(instances);
 
-        LOGGER.info(randomForest.toString());
+        LOGGER.info(classifier.toString());
 
         return fc;
     }
