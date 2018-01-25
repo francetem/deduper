@@ -15,11 +15,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Deduper {
 
-    public static Buckets<String> dedup(Instances dataSet, AbstractClassifier randomForest) throws Exception {
+    private static final Logger LOGGER = Logger.getLogger("deduper");
+
+    public static Buckets<String> dedup(Instances dataSet, AbstractClassifier... classifiers) throws Exception {
         Map<String, Set<String>> duplicates = new HashMap<>();
 
         Iterator<Instance> iterator = dataSet.iterator();
@@ -27,7 +30,22 @@ public class Deduper {
         Map<Pair<String, String>, Double> weights = new HashMap<>();
         while (iterator.hasNext()) {
             Instance instance = iterator.next();
-            double value = randomForest.distributionForInstance(instance)[index];
+
+            double value = 0;
+            int count = 0;
+            for (AbstractClassifier classifier : classifiers) {
+                try {
+                    value = classifier.distributionForInstance(instance)[index];
+                } catch (Exception e) {
+                    LOGGER.warning("couldn't evaluate: " + instance.stringValue(0) + " " + instance.stringValue(1) + " for classifier: " + count);
+                }
+                count++;
+            }
+            if (count == 0) {
+                LOGGER.severe("no classification for: " + instance.stringValue(0) + " " + instance.stringValue(1));
+                continue;
+            }
+            value /= count;
             if (value > 0.5) {
                 String id1;
                 String id2;
