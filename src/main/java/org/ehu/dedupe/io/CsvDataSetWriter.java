@@ -28,13 +28,13 @@ public class CsvDataSetWriter {
     }
 
     public void writeToCSV(Collection<? extends DataRow> dataSet, BufferedWriter bw) throws IOException {
-        header(bw);
+        writeHeader(bw);
         for (DataRow dataRow : dataSet) {
-            writeLine(bw, dataRow);
+            write(bw, dataRow);
         }
     }
 
-    private void writeLine(BufferedWriter bw, DataRow dataRow) throws IOException {
+    public void write(BufferedWriter bw, DataRow dataRow) throws IOException {
         StringBuilder line = new StringBuilder()
                 .append(dataRow.getId1())
                 .append(CSV_SEPARATOR)
@@ -48,7 +48,7 @@ public class CsvDataSetWriter {
         bw.newLine();
     }
 
-    private void header(BufferedWriter bw) throws IOException {
+    public void writeHeader(BufferedWriter bw) throws IOException {
         bw.write("id1;id2;");
         for (FeatureDeriver featureDeriver : featureDerivers) {
             bw.write(featureDeriver.getName() + ";");

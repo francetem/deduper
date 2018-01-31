@@ -17,19 +17,21 @@ import java.util.stream.Stream;
 public class DataRowFactory {
 
     public <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Set<D> from(DataRowBuilder<I, E, D> dataRowBuilder) {
-        BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction = (dataRowBuilderParam, index) -> target(dataRowBuilder, index);
-        return from(dataRowBuilder, targetFunction);
+        return streamFrom(dataRowBuilder).collect(Collectors.toSet());
     }
 
-    private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Set<D> from(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
+    public <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Stream<D> streamFrom(DataRowBuilder<I, E, D> dataRowBuilder) {
+        BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction = (dataRowBuilderParam, index) -> target(dataRowBuilder, index);
+        return streamFrom(dataRowBuilder, targetFunction);
+    }
 
+    private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Stream<D> streamFrom(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
         List<CalculationResult<FeatureCalculator, D>> calculationResults = calculateParallel(dataRowBuilder, targetFunction);
 
         return calculationResults
                 .parallelStream()
                 .peek(CalculationResult::assign)
-                .map(CalculationResult::getDataRow)
-                .collect(Collectors.toSet());
+                .map(CalculationResult::getDataRow);
     }
 
     private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> List<CalculationResult<FeatureCalculator, D>> calculateParallel(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {

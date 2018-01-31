@@ -23,6 +23,10 @@ public class Deduper {
     private static final Logger LOGGER = Logger.getLogger("deduper");
 
     public static Buckets<String> dedup(Instances dataSet, AbstractClassifier... classifiers) throws Exception {
+        return dedup(dataSet, false, classifiers);
+    }
+
+    public static Buckets<String> dedup(Instances dataSet, boolean partialOnError, AbstractClassifier... classifiers) {
         Map<String, Set<String>> duplicates = new HashMap<>();
 
         Iterator<Instance> iterator = dataSet.iterator();
@@ -35,31 +39,29 @@ public class Deduper {
             int count = 0;
             for (AbstractClassifier classifier : classifiers) {
                 try {
-                    value = classifier.distributionForInstance(instance)[index];
+                    value += classifier.distributionForInstance(instance)[index];
+                    count++;
                 } catch (Exception e) {
                     LOGGER.warning("couldn't evaluate: " + instance.stringValue(0) + " " + instance.stringValue(1) + " for classifier: " + count);
                 }
-                count++;
             }
-            if (count == 0) {
+
+            if (partialOnError && count == 0 || !partialOnError && count < classifiers.length) {
                 LOGGER.severe("no classification for: " + instance.stringValue(0) + " " + instance.stringValue(1));
                 continue;
             }
+
             value /= count;
+            String id1 = getId(instance, 0);
+            String id2 = getId(instance, 1);
+            Set<String> duplicates1 = duplicates.computeIfAbsent(id1, x -> new HashSet<>());
+            Set<String> duplicates2 = duplicates.computeIfAbsent(id2, x -> new HashSet<>());
+
             if (value > 0.5) {
-                String id1;
-                String id2;
-                if (instance.attribute(0).isNumeric()) {
-                    id1 = String.valueOf(instance.value(0));
-                    id2 = String.valueOf(instance.value(1));
-                } else {
-                    id1 = instance.stringValue(0);
-                    id2 = instance.stringValue(1);
-                }
                 weights.put(new ImmutablePair<>(id1, id2), value);
                 weights.put(new ImmutablePair<>(id2, id1), value);
-                duplicates.computeIfAbsent(id1, x -> new HashSet<>()).add(id2);
-                duplicates.computeIfAbsent(id2, x -> new HashSet<>()).add(id1);
+                duplicates1.add(id2);
+                duplicates2.add(id1);
             }
         }
 
@@ -81,5 +83,17 @@ public class Deduper {
         }
         List<Set<String>> dups = bucks.stream().map(VertexSet::asSet).collect(Collectors.toList());
         return Buckets.from(dups);
+    }
+
+    public static String getId(Instance instance, int indexId) {
+        String id1;
+        if (instance.attribute(indexId).isNumeric()) {
+            id1 = String.valueOf(instance.value(indexId));
+            //id2 = String.valueOf(instance.value(1));
+        } else {
+            id1 = instance.stringValue(indexId);
+            // id2 = instance.stringValue(1);
+        }
+        return id1;
     }
 }

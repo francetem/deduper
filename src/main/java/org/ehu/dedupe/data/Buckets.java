@@ -58,6 +58,10 @@ public class Buckets<I> {
         return inverseBuckets.get(t);
     }
 
+    public boolean contains(I t) {
+        return inverseBuckets.containsKey(t);
+    }
+
     public Set<I> get(Integer clusterId) {
         return buckets.get(clusterId);
     }
