@@ -54,6 +54,20 @@ public class DataRowFactoryTest {
         assertEquals(dataRows, Stream.of(new DataRowTest(2, 1, false), new DataRowTest(1, 3, false), new DataRowTest(2, 3, false)).collect(Collectors.toSet()));
     }
 
+    @Test
+    public void testOnInBucketFilter() throws Exception {
+
+        List<Source<Integer>> sources = IntStream.of(1, 2, 3).boxed().map(Source::new).collect(Collectors.toList());
+
+        DataRowBuilder<Integer, Source<Integer>, DataRowTest> builder = new DataRowBuilder<>(DataRowTest.class)
+                .withSources(sources)
+                .inBucket(true)
+                .withFeatureCalculators(Collections.singletonList(new IdentityFeatureCalculator()));
+        Set<DataRowTest> dataRows = new DataRowFactory().from(builder);
+
+        assertTrue(dataRows.isEmpty());
+    }
+
     private static final class DataRowTest extends DataRow<Integer> {
 
         public DataRowTest(Integer id1, Integer id2, Boolean duplicate) {

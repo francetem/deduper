@@ -17,6 +17,7 @@ public class DataRowBuilder<I extends Comparable<I>, E extends Source<I>, D exte
     private BiPredicate<E, E> blockingPredicate = (E x, E y) -> true;
     private Buckets<I> buckets = Buckets.from(Collections.emptyList());
     private List<? extends FeatureCalculator> featureCalculators = Collections.emptyList();
+    private boolean inBucket = false;
 
     public DataRowBuilder(Class<D> dataRowClass) {
         this.dataRowClass = dataRowClass;
@@ -59,6 +60,15 @@ public class DataRowBuilder<I extends Comparable<I>, E extends Source<I>, D exte
 
     public DataRowBuilder<I, E, D> withFeatureCalculators(List<? extends FeatureCalculator> featureCalculators) {
         this.featureCalculators = featureCalculators;
+        return this;
+    }
+
+    public boolean onlyInBucket() {
+        return inBucket;
+    }
+
+    public DataRowBuilder<I, E, D> inBucket(boolean inBucket) {
+        this.inBucket = inBucket;
         return this;
     }
 }

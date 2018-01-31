@@ -48,15 +48,28 @@ public class GMD {
         return result;
     }
 
+    /**
+     * Calculate the cost of splitting and merging from gt to er
+     * Any element in er not contained in gt will be ignores
+     *
+     * @param er     entity resolution clusters
+     * @param gt     ground truth
+     * @param fSplit split function calculation
+     * @param fMerge merge function calculation
+     * @param <I>    type of elements
+     * @return The GMD cost from er to gt
+     */
     public <I> BigDecimal cost(Buckets<I> er, Buckets<I> gt, BiFunction<Set<I>, Set<I>, BigDecimal> fSplit, BiFunction<Set<I>, Set<I>, BigDecimal> fMerge) {
 
         Map<Integer, Set<Set<I>>> merging = new HashMap<>();
-        BigDecimal cost = BigDecimal.valueOf(0);
+        BigDecimal cost = BigDecimal.ZERO;
         for (Set<I> es : er.clusters()) {
             Set<Integer> tIds = new HashSet<>();
             for (I t : es) {
-                Collection<Integer> containing = gt.containing(t);
-                tIds.addAll(containing);
+                if (gt.contains(t)) {
+                    Collection<Integer> containing = gt.containing(t);
+                    tIds.addAll(containing);
+                }
             }
             Set<I> splitting = new HashSet<>(es);
             for (Integer id : tIds) {

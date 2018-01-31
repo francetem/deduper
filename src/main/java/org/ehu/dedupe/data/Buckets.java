@@ -65,4 +65,17 @@ public class Buckets<I> {
     public Set<I> get(Integer clusterId) {
         return buckets.get(clusterId);
     }
+
+    public Set<I> keySet() {
+        return clusters().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+    }
+
+    public void removeAll(Collection<I> toRemove) {
+        toRemove.forEach(x -> {
+            if (inverseBuckets.containsKey(x)) {
+                Set<Integer> remove = inverseBuckets.remove(x);
+                remove.forEach(y -> buckets.get(y).remove(x));
+            }
+        });
+    }
 }

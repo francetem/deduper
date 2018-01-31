@@ -35,6 +35,11 @@ public class Deduper {
         while (iterator.hasNext()) {
             Instance instance = iterator.next();
 
+            String id1 = getId(instance, 0);
+            String id2 = getId(instance, 1);
+            Set<String> duplicates1 = duplicates.computeIfAbsent(id1, x -> new HashSet<>());
+            Set<String> duplicates2 = duplicates.computeIfAbsent(id2, x -> new HashSet<>());
+
             double value = 0;
             int count = 0;
             for (AbstractClassifier classifier : classifiers) {
@@ -52,10 +57,6 @@ public class Deduper {
             }
 
             value /= count;
-            String id1 = getId(instance, 0);
-            String id2 = getId(instance, 1);
-            Set<String> duplicates1 = duplicates.computeIfAbsent(id1, x -> new HashSet<>());
-            Set<String> duplicates2 = duplicates.computeIfAbsent(id2, x -> new HashSet<>());
 
             if (value > 0.5) {
                 weights.put(new ImmutablePair<>(id1, id2), value);

@@ -25,6 +25,16 @@ public class DataRowFactory {
         return streamFrom(dataRowBuilder, targetFunction);
     }
 
+    /**
+     * Return the dataset resulting, will filter out any source not contained in the buckets if specified in dataRowBuilder
+     *
+     * @param dataRowBuilder containing the information necessary to generate the dataset
+     * @param targetFunction comparison target
+     * @param <I>            type of element
+     * @param <E>            source type
+     * @param <D>            datarow type
+     * @return a stream of datarows
+     */
     private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Stream<D> streamFrom(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
         List<CalculationResult<FeatureCalculator, D>> calculationResults = calculateParallel(dataRowBuilder, targetFunction);
 
@@ -35,13 +45,22 @@ public class DataRowFactory {
     }
 
     private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> List<CalculationResult<FeatureCalculator, D>> calculateParallel(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
+
+        List<E> dataRowBuilderSources = dataRowBuilder.getSources();
+
+        if (dataRowBuilder.onlyInBucket()) {
+            dataRowBuilderSources = dataRowBuilderSources.stream().filter(x -> dataRowBuilder.getBuckets().contains(x.getId())).collect(Collectors.toList());
+        }
+
+        final List<E> sources = dataRowBuilderSources;
+
         return IntStream
-                .range(0, dataRowBuilder.getSources().size() - 1)
+                .range(0, dataRowBuilderSources.size() - 1)
                 .boxed()
                 .parallel()
                 .flatMap(index1 -> {
                     Stream<E> target = targetFunction.apply(dataRowBuilder, index1);
-                    return toDataRow(dataRowBuilder, index1, target, dataRowBuilder.getSources().get(index1));
+                    return toDataRow(dataRowBuilder, index1, target, sources.get(index1));
                 }).collect(Collectors.toList());
     }
 
