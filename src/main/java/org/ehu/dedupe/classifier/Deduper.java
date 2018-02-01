@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -26,6 +27,14 @@ public class Deduper {
         return dedup(dataSet, false, classifiers);
     }
 
+    /**
+     * Clusterize the instances according to the classifications provided by the classifiers
+     * Any pair referencing the same element will be ignored.
+     * @param dataSet   contains all the comparisons to extract the clusters
+     * @param partialOnError    if true while there is one classifier able to classify we will use the classification, otherwise the result will be ignored
+     * @param classifiers   the list of classifiers
+     * @return The clusters resulting
+     */
     public static Buckets<String> dedup(Instances dataSet, boolean partialOnError, AbstractClassifier... classifiers) {
         Map<String, Set<String>> duplicates = new HashMap<>();
 
@@ -38,6 +47,11 @@ public class Deduper {
             String id1 = getId(instance, 0);
             String id2 = getId(instance, 1);
             Set<String> duplicates1 = duplicates.computeIfAbsent(id1, x -> new HashSet<>());
+
+            if (Objects.equals(id1, id2)) {
+                continue;
+            }
+
             Set<String> duplicates2 = duplicates.computeIfAbsent(id2, x -> new HashSet<>());
 
             double value = 0;
@@ -66,6 +80,10 @@ public class Deduper {
             }
         }
 
+        return toClusters(duplicates, weights);
+    }
+
+    public static Buckets<String> toClusters(Map<String, Set<String>> duplicates, Map<Pair<String, String>, Double> weights) {
         Set<VertexSet<String>> bucks = new HashSet<>();
 
         for (String key : new HashSet<>(duplicates.keySet())) {
