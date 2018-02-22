@@ -77,5 +77,13 @@ public class Buckets<I> {
                 remove.forEach(y -> buckets.get(y).remove(x));
             }
         });
+        Set<I> inverseBucketsKeySet = new HashSet<>(inverseBuckets.keySet());
+        inverseBucketsKeySet.stream().filter(x -> inverseBuckets.get(x).isEmpty()).forEach(inverseBuckets::remove);
+        Set<Integer> bucketsKeySet = new HashSet<>(buckets.keySet());
+        bucketsKeySet.stream().filter(x -> buckets.get(x).isEmpty()).forEach(buckets::remove);
+    }
+
+    public static Buckets empty() {
+        return new Buckets<>(Collections.emptyMap());
     }
 }

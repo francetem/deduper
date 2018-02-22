@@ -35,7 +35,7 @@ public class DataRowFactory {
      * @param <D>            datarow type
      * @return a stream of datarows
      */
-    private <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Stream<D> streamFrom(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
+    public <I extends Comparable<I>, E extends Source<I>, D extends DataRow<I>> Stream<D> streamFrom(DataRowBuilder<I, E, D> dataRowBuilder, BiFunction<DataRowBuilder<I, E, D>, Integer, Stream<E>> targetFunction) {
         List<CalculationResult<FeatureCalculator, D>> calculationResults = calculateParallel(dataRowBuilder, targetFunction);
 
         return calculationResults

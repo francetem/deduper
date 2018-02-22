@@ -22,20 +22,31 @@ import java.util.stream.Collectors;
 public class Deduper {
 
     private static final Logger LOGGER = Logger.getLogger("deduper");
+    private final Instances dataSet;
+    private final AbstractClassifier[] classifiers;
 
-    public static Buckets<String> dedup(Instances dataSet, AbstractClassifier... classifiers) throws Exception {
-        return dedup(dataSet, false, classifiers);
+    /**
+     * @param dataSet     contains all the comparisons to extract the clusters
+     * @param classifiers the list of classifiers
+     */
+    public Deduper(Instances dataSet, AbstractClassifier... classifiers) {
+        this.dataSet = dataSet;
+        this.classifiers = classifiers;
+    }
+
+    public Buckets<String> dedup() throws Exception {
+        return dedup(false, 0.5);
     }
 
     /**
      * Clusterize the instances according to the classifications provided by the classifiers
      * Any pair referencing the same element will be ignored.
-     * @param dataSet   contains all the comparisons to extract the clusters
-     * @param partialOnError    if true while there is one classifier able to classify we will use the classification, otherwise the result will be ignored
-     * @param classifiers   the list of classifiers
+     *
+     * @param partialOnError if true while there is one classifier able to classify we will use the classification, otherwise the result will be ignored
+     * @param threshold
      * @return The clusters resulting
      */
-    public static Buckets<String> dedup(Instances dataSet, boolean partialOnError, AbstractClassifier... classifiers) {
+    public Buckets<String> dedup(boolean partialOnError, double threshold) {
         Map<String, Set<String>> duplicates = new HashMap<>();
 
         Iterator<Instance> iterator = dataSet.iterator();
@@ -48,7 +59,7 @@ public class Deduper {
             String id2 = getId(instance, 1);
             Set<String> duplicates1 = duplicates.computeIfAbsent(id1, x -> new HashSet<>());
 
-            if (Objects.equals(id1, id2)) {
+            if (Objects.equals(id1, id2) || index == -1) {
                 continue;
             }
 
@@ -61,7 +72,7 @@ public class Deduper {
                     value += classifier.distributionForInstance(instance)[index];
                     count++;
                 } catch (Exception e) {
-                    LOGGER.warning("couldn't evaluate: " + instance.stringValue(0) + " " + instance.stringValue(1) + " for classifier: " + count);
+                    LOGGER.warning("couldn't evaluate: " + instance.stringValue(0) + " " + instance.stringValue(1) + " for classifier: " + count + " error: " + e.getMessage());
                 }
             }
 
@@ -72,7 +83,7 @@ public class Deduper {
 
             value /= count;
 
-            if (value > 0.5) {
+            if (value > threshold) {
                 weights.put(new ImmutablePair<>(id1, id2), value);
                 weights.put(new ImmutablePair<>(id2, id1), value);
                 duplicates1.add(id2);
@@ -83,7 +94,7 @@ public class Deduper {
         return toClusters(duplicates, weights);
     }
 
-    public static Buckets<String> toClusters(Map<String, Set<String>> duplicates, Map<Pair<String, String>, Double> weights) {
+    private static Buckets<String> toClusters(Map<String, Set<String>> duplicates, Map<Pair<String, String>, Double> weights) {
         Set<VertexSet<String>> bucks = new HashSet<>();
 
         for (String key : new HashSet<>(duplicates.keySet())) {
@@ -104,7 +115,7 @@ public class Deduper {
         return Buckets.from(dups);
     }
 
-    public static String getId(Instance instance, int indexId) {
+    private static String getId(Instance instance, int indexId) {
         String id1;
         if (instance.attribute(indexId).isNumeric()) {
             id1 = String.valueOf(instance.value(indexId));

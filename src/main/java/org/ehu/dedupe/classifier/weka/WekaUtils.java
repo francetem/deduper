@@ -12,6 +12,7 @@ import weka.filters.unsupervised.attribute.RemoveByName;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -21,12 +22,27 @@ public class WekaUtils {
     private static final Logger LOGGER = Logger.getLogger("weka");
 
     public static Instances getCsvInstances(String datasetFileName) throws IOException {
-        CSVLoader csvLoader = new CSVLoader();
-        csvLoader.setFieldSeparator(";");
+        CSVLoader csvLoader = getCsvLoader();
         csvLoader.setFile(new File(datasetFileName));
+        return getInstances(csvLoader);
+    }
+
+    public static Instances getCsvInstances(InputStream source) throws IOException {
+        CSVLoader csvLoader = getCsvLoader();
+        csvLoader.setSource(source);
+        return getInstances(csvLoader);
+    }
+
+    public static Instances getInstances(CSVLoader csvLoader) throws IOException {
         Instances dataSet = csvLoader.getDataSet();
         dataSet.setClassIndex(dataSet.numAttributes() - 1);
         return dataSet;
+    }
+
+    public static CSVLoader getCsvLoader() {
+        CSVLoader csvLoader = new CSVLoader();
+        csvLoader.setFieldSeparator(";");
+        return csvLoader;
     }
 
     public static AbstractClassifier buildDefaultClassifier(Instances instances) throws Exception {
