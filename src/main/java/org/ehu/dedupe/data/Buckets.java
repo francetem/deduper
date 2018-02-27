@@ -1,5 +1,9 @@
 package org.ehu.dedupe.data;
 
+import com.google.gson.reflect.TypeToken;
+import org.ehu.dedupe.io.JsonFileReader;
+
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,5 +89,10 @@ public class Buckets<I> {
 
     public static Buckets empty() {
         return new Buckets<>(Collections.emptyMap());
+    }
+
+    public static Buckets<String> load(String fileName) throws IOException {
+        return Buckets.from(JsonFileReader.readJsonFile(new TypeToken<List<Set<String>>>() {
+        }, fileName));
     }
 }

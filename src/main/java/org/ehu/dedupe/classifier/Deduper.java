@@ -3,8 +3,6 @@ package org.ehu.dedupe.classifier;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ehu.dedupe.data.Buckets;
-import org.ehu.dedupe.graph.Vertex;
-import org.ehu.dedupe.graph.VertexSet;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -12,45 +10,66 @@ import weka.core.Instances;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class Deduper {
 
     private static final Logger LOGGER = Logger.getLogger("deduper");
+
     private final Instances dataSet;
-    private final AbstractClassifier[] classifiers;
+    private final Classifier classifier;
 
     /**
-     * @param dataSet     contains all the comparisons to extract the clusters
-     * @param classifiers the list of classifiers
+     * @param dataSet                    contains all the comparisons to extract the clusters
+     * @param classifiers                the list of classifiers
+     * @param partialOnError             if true while there is one classifier able to classify we will use the classification, otherwise the result will be ignored
+     * @param indexOfDuplicateClassValue index of the duped class value
      */
-    public Deduper(Instances dataSet, AbstractClassifier... classifiers) {
+    public Deduper(Instances dataSet, boolean partialOnError, int indexOfDuplicateClassValue, AbstractClassifier... classifiers) {
         this.dataSet = dataSet;
-        this.classifiers = classifiers;
+        this.classifier = new DefaultClassifier(partialOnError, indexOfDuplicateClassValue, classifiers);
+    }
+
+    public Deduper(Instances dataSet, Classifier classifier) {
+        this.dataSet = dataSet;
+        this.classifier = classifier;
+    }
+
+    public Deduper(Instances dataSet, boolean partialOnError, AbstractClassifier... classifiers) {
+        this(dataSet, partialOnError, getTrueIndexForClassAttribute(dataSet), classifiers);
+    }
+
+    public Deduper(Instances dataSet, AbstractClassifier... classifiers) {
+        this(dataSet, false, getTrueIndexForClassAttribute(dataSet), classifiers);
     }
 
     public Buckets<String> dedup() throws Exception {
-        return dedup(false, 0.5);
+        return dedup(0.5);
     }
 
     /**
      * Clusterize the instances according to the classifications provided by the classifiers
      * Any pair referencing the same element will be ignored.
      *
-     * @param partialOnError if true while there is one classifier able to classify we will use the classification, otherwise the result will be ignored
-     * @param threshold
-     * @return The clusters resulting
+     * @param threshold value above which probability we will consider a duped
+     * @return The resulting clusters
      */
-    public Buckets<String> dedup(boolean partialOnError, double threshold) {
+    public Buckets<String> dedup(double threshold) {
+        return doPairResolution(threshold, classifier).toNormalizedClusters();
+    }
+
+    public PairResolution doPairResolution(double threshold) {
+        return doPairResolution(threshold, classifier);
+    }
+
+    private PairResolution doPairResolution(double threshold, Classifier classifier) {
         Map<String, Set<String>> duplicates = new HashMap<>();
 
         Iterator<Instance> iterator = dataSet.iterator();
-        int index = dataSet.classAttribute().indexOfValue("true");
+
         Map<Pair<String, String>, Double> weights = new HashMap<>();
         while (iterator.hasNext()) {
             Instance instance = iterator.next();
@@ -59,60 +78,30 @@ public class Deduper {
             String id2 = getId(instance, 1);
             Set<String> duplicates1 = duplicates.computeIfAbsent(id1, x -> new HashSet<>());
 
-            if (Objects.equals(id1, id2) || index == -1) {
+            if (Objects.equals(id1, id2)) {
                 continue;
             }
 
             Set<String> duplicates2 = duplicates.computeIfAbsent(id2, x -> new HashSet<>());
 
-            double value = 0;
-            int count = 0;
-            for (AbstractClassifier classifier : classifiers) {
-                try {
-                    value += classifier.distributionForInstance(instance)[index];
-                    count++;
-                } catch (Exception e) {
-                    LOGGER.warning("couldn't evaluate: " + instance.stringValue(0) + " " + instance.stringValue(1) + " for classifier: " + count + " error: " + e.getMessage());
-                }
-            }
-
-            if (partialOnError && count == 0 || !partialOnError && count < classifiers.length) {
-                LOGGER.severe("no classification for: " + instance.stringValue(0) + " " + instance.stringValue(1));
+            double value;
+            try {
+                value = classifier.classify(instance);
+            } catch (ClassifierException e) {
+                LOGGER.severe(e.getMessage());
                 continue;
             }
 
-            value /= count;
+            weights.put(new ImmutablePair<>(id1, id2), value);
+            weights.put(new ImmutablePair<>(id2, id1), value);
 
-            if (value > threshold) {
-                weights.put(new ImmutablePair<>(id1, id2), value);
-                weights.put(new ImmutablePair<>(id2, id1), value);
+            if (value >= threshold) {
                 duplicates1.add(id2);
                 duplicates2.add(id1);
             }
         }
 
-        return toClusters(duplicates, weights);
-    }
-
-    private static Buckets<String> toClusters(Map<String, Set<String>> duplicates, Map<Pair<String, String>, Double> weights) {
-        Set<VertexSet<String>> bucks = new HashSet<>();
-
-        for (String key : new HashSet<>(duplicates.keySet())) {
-            if (!duplicates.containsKey(key)) {
-                continue;
-            }
-            VertexSet<String> vertexSet = VertexSet.renderGraph(duplicates, new Vertex<>(key));
-            vertexSet.getVertexes().stream().map(Vertex::getId).forEach(duplicates::remove);
-            //neo4jStore.store(vertexSet, "instance", weights);
-            Set<VertexSet<String>> vertexSets = VertexSet.bronKerbosch(vertexSet);
-            if (vertexSets.size() > 1) {
-                bucks.addAll(VertexSet.normalize(vertexSet, weights));
-            } else {
-                bucks.addAll(vertexSets);
-            }
-        }
-        List<Set<String>> dups = bucks.stream().map(VertexSet::asSet).collect(Collectors.toList());
-        return Buckets.from(dups);
+        return new PairResolution(duplicates, weights);
     }
 
     private static String getId(Instance instance, int indexId) {
@@ -125,5 +114,9 @@ public class Deduper {
             // id2 = instance.stringValue(1);
         }
         return id1;
+    }
+
+    public static int getTrueIndexForClassAttribute(Instances dataSet) {
+        return dataSet.classAttribute().indexOfValue("true");
     }
 }

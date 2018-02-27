@@ -18,8 +18,8 @@ import static org.testng.Assert.assertFalse;
 
 public class DeduperTest {
 
-    Instances dataSet;
-    AbstractClassifier classifier;
+    private Instances dataSet;
+    private AbstractClassifier classifier;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -43,8 +43,8 @@ public class DeduperTest {
 
     @Test
     public void testDedupForce() throws Exception {
-        Deduper deduper = new Deduper(dataSet, classifier);
-        Buckets<String> dedup = deduper.dedup(true, 0.5);
+        Deduper deduper = new Deduper(dataSet, true, classifier);
+        Buckets<String> dedup = deduper.dedup(0.5);
 
         assertFalse(dedup.clusters().isEmpty());
 
