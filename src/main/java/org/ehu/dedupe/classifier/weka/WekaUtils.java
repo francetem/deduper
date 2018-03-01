@@ -67,9 +67,9 @@ public class WekaUtils {
         return fc;
     }
 
-    public static Evaluation crossValidateModel(Instances dataSet, Classifier randomForest) throws Exception {
+    public static Evaluation crossValidateModel(Instances dataSet, Classifier classifier) throws Exception {
         Evaluation eval = new Evaluation(dataSet);
-        eval.crossValidateModel(randomForest, dataSet, 10, new Random(1));
+        eval.crossValidateModel(classifier, dataSet, 10, new Random());
 
         return eval;
     }

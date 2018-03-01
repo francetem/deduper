@@ -52,9 +52,13 @@ public class PairResolution {
     }
 
     public Collection<VertexSet<String>> normalize(VertexSet<String> vertexSet) {
+        return normalize(vertexSet, getWeights());
+    }
+
+    public static Collection<VertexSet<String>> normalize(VertexSet<String> vertexSet, Map<Pair<String, String>, Double> weights) {
         Set<VertexSet<String>> vertexSets = VertexSet.bronKerbosch(vertexSet);
         if (vertexSets.size() > 1) {
-            return VertexSet.normalize(vertexSet, getWeights());
+            return VertexSet.normalize(vertexSet, weights);
         } else {
             return vertexSets;
         }
