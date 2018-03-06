@@ -22,6 +22,10 @@ public class Buckets<I> {
     public Buckets(Map<I, Set<Integer>> inverseBuckets) {
         this.inverseBuckets = inverseBuckets;
         this.buckets = new HashMap<>();
+        update(inverseBuckets);
+    }
+
+    public void update(Map<I, Set<Integer>> inverseBuckets) {
         for (Map.Entry<I, Set<Integer>> entry : inverseBuckets.entrySet()) {
             for (Integer id : entry.getValue()) {
                 if (!buckets.containsKey(id)) {
@@ -33,6 +37,10 @@ public class Buckets<I> {
     }
 
     public static <I> Buckets<I> from(List<Set<I>> clusters) {
+        return new Buckets<>(toInverse(clusters, 0));
+    }
+
+    public static <I> Map<I, Set<Integer>> toInverse(List<Set<I>> clusters, int max) {
         Map<I, Set<Integer>> inverses = new HashMap<>();
         for (I element : clusters.stream().flatMap(Collection::stream).collect(Collectors.toSet())) {
             inverses.put(element, new HashSet<>());
@@ -40,10 +48,16 @@ public class Buckets<I> {
 
         for (int i = 0; i < clusters.size(); i++) {
             for (I x : clusters.get(i)) {
-                inverses.get(x).add(i);
+                inverses.get(x).add(max + i);
             }
         }
-        return new Buckets<>(inverses);
+        return inverses;
+    }
+
+    public void addAll(List<Set<I>> clusters) {
+        Map<I, Set<Integer>> inverse = toInverse(clusters, buckets.keySet().stream().max(Integer::compareTo).orElse(-1) + 1);
+        inverseBuckets.putAll(inverse);
+        update(inverse);
     }
 
     public Boolean isSameBucket(I id1, I id2) {

@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,6 +45,13 @@ public class BucketsTest {
     @Test
     public void testDuplicates() throws Exception {
         assertEquals(buckets.duplicates("r1"), Stream.of("r3", "r5").collect(Collectors.toSet()));
+    }
+
+    @Test
+    public void testToInverse() throws Exception {
+        Buckets<String> r1 = Buckets.from(Collections.singletonList(Stream.of("r1").collect(Collectors.toSet())));
+        r1.addAll(Collections.singletonList(Stream.of("r2").collect(Collectors.toSet())));
+        assertEquals(r1.clusters().size(), 2);
     }
 
 }
