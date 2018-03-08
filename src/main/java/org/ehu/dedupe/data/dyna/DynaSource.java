@@ -22,7 +22,7 @@ public class DynaSource<I> extends Source<I> {
         return new DynaSource<>(dynaBean);
     }
 
-    void set(String propertyName, Object value) {
+    public void set(String propertyName, Object value) {
         dynaBean.set(propertyName, value);
     }
 
