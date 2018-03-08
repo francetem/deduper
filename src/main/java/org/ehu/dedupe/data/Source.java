@@ -17,7 +17,7 @@ public class Source<I> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Source)) return false;
         Source<?> source = (Source<?>) o;
         return Objects.equals(id, source.id);
     }
