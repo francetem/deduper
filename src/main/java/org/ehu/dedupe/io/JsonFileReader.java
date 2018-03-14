@@ -12,13 +12,9 @@ public class JsonFileReader {
 
     private static final Gson GSON = new Gson();
 
-    public static <T> T readJsonResourceFile(TypeToken<T> typeToken, String name) throws IOException {
-        ClassLoader classLoader = JsonFileReader.class.getClassLoader();
-        return readJsonResourceFile(typeToken, name, classLoader);
-    }
-
-    public static <T> T readJsonResourceFile(TypeToken<T> typeToken, String name, ClassLoader classLoader) throws IOException {
-        String data = readJsonResourceFile(name, classLoader);
+    public static <T> T readJsonResourceFile(TypeToken<T> typeToken, String name, Class clazz) throws IOException {
+        String filename = clazz.getResource(name).getFile();
+        String data = readJsonFile(filename);
         return toJson(typeToken, data);
     }
 
@@ -30,11 +26,6 @@ public class JsonFileReader {
     private static <T> T toJson(TypeToken<T> typeToken, String data) {
         Type type = typeToken.getType();
         return GSON.fromJson(data, type);
-    }
-
-    private static String readJsonResourceFile(String name, ClassLoader classLoader) throws IOException {
-        String filename = classLoader.getResource(name).getFile();
-        return readJsonFile(filename);
     }
 
     private static String readJsonFile(String filename) throws IOException {

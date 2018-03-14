@@ -5,15 +5,15 @@ import java.math.BigDecimal;
 public class Coordinates {
 
     private final float lat;
-    private final float lng;
+    private final float lon;
 
-    public Coordinates(float lat, float lng) {
+    public Coordinates(float lat, float lon) {
         this.lat = lat;
-        this.lng = lng;
+        this.lon = lon;
     }
 
     public BigDecimal distFrom(Coordinates coordinates2) {
-        double earthRadius = 6371000; //meters
+        double earthRadius = 6371000;
         double dLat = Math.toRadians(coordinates2.getLat() - getLat());
         double dLng = Math.toRadians(coordinates2.getLon() - getLon());
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -29,6 +29,6 @@ public class Coordinates {
     }
 
     public float getLon() {
-        return lng;
+        return lon;
     }
 }

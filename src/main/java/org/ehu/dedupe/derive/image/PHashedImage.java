@@ -6,7 +6,7 @@ public class PHashedImage {
 
     public static final PHashedImage EMPTY = new PHashedImage("", "");
 
-    private HammingDistance hamming = new HammingDistance();
+    private static final transient HammingDistance HAMMING = new HammingDistance();
 
     private final String url;
     private final String hash;
@@ -39,6 +39,6 @@ public class PHashedImage {
         if (leftLen != rightLen) {
             return Math.max(leftLen, rightLen);
         }
-        return hamming.apply(leftHash, rightHash);
+        return HAMMING.apply(leftHash, rightHash);
     }
 }
