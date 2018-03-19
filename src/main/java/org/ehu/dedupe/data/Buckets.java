@@ -101,7 +101,7 @@ public class Buckets<I> {
         bucketsKeySet.stream().filter(x -> buckets.get(x).isEmpty()).forEach(buckets::remove);
     }
 
-    public static Buckets empty() {
+    public static <T> Buckets<T> empty() {
         return new Buckets<>(Collections.emptyMap());
     }
 

@@ -18,17 +18,17 @@ public class DocFrequency {
     }
 
     public List<String> document(String doc) {
-        List<String> words1 = words(doc);
-        documentCount(words1);
-        return words1;
+        List<String> words = words(doc);
+        documentCount(words);
+        return words;
     }
 
     void documentCount(List<String> words) {
         words.forEach(word -> docFrequency.computeIfAbsent(word, x -> new LongAdder()).increment());
     }
 
-    private static List<String> words(String name) {
-        StringTokenizer tokenizer = new StringTokenizer(name);
+    private static List<String> words(String word) {
+        StringTokenizer tokenizer = new StringTokenizer(word);
         List<String> words1 = new ArrayList<>();
         while (tokenizer.hasMoreTokens()) {
             words1.add(tokenizer.nextToken());
