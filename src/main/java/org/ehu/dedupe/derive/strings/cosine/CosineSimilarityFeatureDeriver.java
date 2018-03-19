@@ -1,5 +1,6 @@
 package org.ehu.dedupe.derive.strings.cosine;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ehu.dedupe.derive.ReflectionDeriver;
 import org.ehu.dedupe.derive.strings.DocFrequency;
 
@@ -11,8 +12,8 @@ public class CosineSimilarityFeatureDeriver<S> extends ReflectionDeriver<BigDeci
 
     public CosineSimilarityFeatureDeriver(String propertyName, Function<S, String> getter, DocFrequency docFrequency) {
         super(propertyName, (x, y) -> {
-            String xGet = getter.apply(x);
-            String yGet = getter.apply(y);
+            String xGet = StringUtils.defaultString(getter.apply(x));
+            String yGet = StringUtils.defaultString(getter.apply(y));
 
             List<String> words1 = docFrequency.document(xGet);
             List<String> words2 = docFrequency.document(yGet);
