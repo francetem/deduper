@@ -7,6 +7,7 @@ import org.ehu.dedupe.graph.VertexSet;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,11 +44,12 @@ public class PairResolution {
     }
 
     public Set<VertexSet<String>> renderGraphs() {
-        return new HashSet<>(getDuplicates().keySet())
+        Map<String, Set<String>> duplicates = new HashMap<>(getDuplicates());
+        return new HashSet<>(duplicates.keySet())
                 .stream()
-                .filter(key -> getDuplicates().containsKey(key))
-                .map(key -> VertexSet.renderGraph(getDuplicates(), new Vertex<>(key)))
-                .peek(vertexSet -> vertexSet.getVertexes().stream().map(Vertex::getId).forEach(getDuplicates()::remove))
+                .filter(duplicates::containsKey)
+                .map(key -> VertexSet.renderGraph(duplicates, new Vertex<>(key)))
+                .peek(vertexSet -> vertexSet.getVertexes().stream().map(Vertex::getId).forEach(duplicates::remove))
                 .collect(Collectors.toSet());
     }
 
