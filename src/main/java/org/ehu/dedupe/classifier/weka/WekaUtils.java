@@ -6,6 +6,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
+import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 import weka.filters.unsupervised.attribute.RemoveByName;
 
@@ -77,6 +78,13 @@ public class WekaUtils {
     public static void saveModel(AbstractClassifier classifier, String file) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
         saveModel(classifier, oos);
+    }
+
+    public static void saveArff(Instances instances, String pathname) throws IOException {
+        ArffSaver saver = new ArffSaver();
+        saver.setInstances(instances);
+        saver.setFile(new File(pathname));
+        saver.writeBatch();
     }
 
     public static void saveModel(AbstractClassifier classifier, ObjectOutputStream oos) throws IOException {
