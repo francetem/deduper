@@ -31,4 +31,9 @@ public class Coordinates {
     public float getLon() {
         return lon;
     }
+
+    @Override
+    public String toString() {
+        return lat + "," + lon;
+    }
 }

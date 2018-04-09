@@ -63,6 +63,11 @@ public class DatasetBuilder<K extends Comparable<K>, S extends Source<K>, D exte
         return this;
     }
 
+    public DatasetBuilder<K, S, D> withBuckets(Buckets<K> buckets) {
+        this.buckets = buckets;
+        return this;
+    }
+
     public boolean onlyInBucket() {
         return inBucket;
     }

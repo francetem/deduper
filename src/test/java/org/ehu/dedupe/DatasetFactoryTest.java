@@ -1,5 +1,6 @@
 package org.ehu.dedupe;
 
+import org.ehu.dedupe.data.Buckets;
 import org.ehu.dedupe.data.Source;
 import org.ehu.dedupe.data.dyna.DynaDataRow;
 import org.testng.annotations.Test;
@@ -62,6 +63,7 @@ public class DatasetFactoryTest {
 
         DatasetBuilder<Integer, Source<Integer>, DynaDataRow<Integer>> builder = new DatasetBuilder<Integer, Source<Integer>, DynaDataRow<Integer>>()
                 .withSources(sources)
+                .withBuckets(Buckets.empty())
                 .inBucket(true)
                 .withFeatureDerivers(Collections.singletonList(new IdentityFeatureCalculator()));
         DataSet<Integer> dataSet = new DatasetFactory().from(builder);

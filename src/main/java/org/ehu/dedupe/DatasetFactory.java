@@ -15,12 +15,13 @@ public class DatasetFactory {
 
         BiPredicate<E, E> blockingPredicate = datasetBuilder.getBlockingPredicate();
 
-        Sources<K, E> sources = Sources.from(new ArrayList<>(datasetBuilder.getSources()));
-
         Buckets<K> buckets = datasetBuilder.getBuckets();
+
+        Sources<K, E> sources = Sources.from(new ArrayList<>(datasetBuilder.getSources()));
         if (datasetBuilder.onlyInBucket()) {
             sources = sources.onlyIn(buckets);
         }
+
         List<? extends FeatureDeriver> featureDerivers = datasetBuilder.getFeatureDerivers();
         DatarowFactory<D, K> datarowFactory = datasetBuilder.getDatarowFactory();
 
