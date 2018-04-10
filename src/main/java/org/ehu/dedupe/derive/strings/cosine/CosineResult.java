@@ -41,7 +41,7 @@ public class CosineResult implements Result<BigDecimal> {
 
                 double tf2 = (double) Collections.frequency(words2, word) / size2;
                 double idf = idf(word);
-                double tf1 = (double) Collections.frequency(words2, word) / size1;
+                double tf1 = (double) Collections.frequency(words1, word) / size1;
                 double tfidf1 = idf * tf1;
                 double tfidf2 = idf * tf2;
 
@@ -60,6 +60,9 @@ public class CosineResult implements Result<BigDecimal> {
             magnitude1 = Math.sqrt(magnitude1);
             magnitude2 = Math.sqrt(magnitude2);
             double val = dotProduct / (magnitude1 * magnitude2);
+            if (Double.isNaN(val)) {
+                return BigDecimal.ONE;
+            }
             return new BigDecimal(String.valueOf(val), MathContext.DECIMAL32);
         }
     }
