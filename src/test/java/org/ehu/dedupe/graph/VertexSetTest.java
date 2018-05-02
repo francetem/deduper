@@ -1,6 +1,7 @@
 package org.ehu.dedupe.graph;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.ehu.dedupe.classifier.PairResolution;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -72,7 +73,7 @@ public class VertexSetTest {
         weights.put(Pair.of(6, 4), 1d);
         weights.put(Pair.of(6, 5), 1d);
 
-        Collection<VertexSet<Integer>> normalized = VertexSet.normalize(graph, weights);
+        Collection<VertexSet<Integer>> normalized = VertexSet.normalize(graph, weights, PairResolution::shouldSplit);
         assertEquals(normalized.size(), 2);
     }
 

@@ -8,6 +8,7 @@ import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
+import weka.core.converters.ConverterUtils;
 import weka.filters.unsupervised.attribute.RemoveByName;
 
 import java.io.File;
@@ -85,6 +86,11 @@ public class WekaUtils {
         saver.setInstances(instances);
         saver.setFile(new File(pathname));
         saver.writeBatch();
+    }
+
+    public static Instances readArff(String pathname) throws Exception {
+        ConverterUtils.DataSource source = new ConverterUtils.DataSource(pathname);
+        return source.getDataSet();
     }
 
     public static void saveModel(AbstractClassifier classifier, ObjectOutputStream oos) throws IOException {

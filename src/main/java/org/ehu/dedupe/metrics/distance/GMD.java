@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GMD {
 
@@ -44,11 +46,15 @@ public class GMD {
      * @param <I>    type of elements
      * @return The GMD cost from er to gt
      */
-    public <I> BigDecimal cost(Buckets<I> er, Buckets<I> gt, Function<Collection<Collection<I>>, BigDecimal> fSplit, Function<Collection<Collection<I>>, BigDecimal> fMerge) {
+    public <I> BigDecimal cost(final Buckets<I> er, final Buckets<I> gt, Function<Collection<Collection<I>>, BigDecimal> fSplit, Function<Collection<Collection<I>>, BigDecimal> fMerge) {
+
+        Set<I> missingEr = gt.clusters().stream().flatMap(Collection::stream).filter(x -> !er.contains(x)).collect(Collectors.toSet());
 
         Map<Integer, Collection<Collection<I>>> merging = new HashMap<>();
         Collection<Collection<Collection<I>>> splitting = new ArrayList<>();
-        for (Set<I> es : er.clusters()) {
+        Collection<Set<I>> clusters = new ArrayList<>(er.clusters());
+        clusters.addAll(missingEr.stream().map(x -> Stream.of(x).collect(Collectors.toSet())).collect(Collectors.toSet()));
+        for (Set<I> es : clusters) {
             Set<Integer> tIds = intersectingIds(gt, es);
 
             if (tIds.size() > 1) {

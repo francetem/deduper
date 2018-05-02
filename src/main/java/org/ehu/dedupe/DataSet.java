@@ -4,6 +4,7 @@ import org.ehu.dedupe.data.DataRow;
 import org.ehu.dedupe.derive.FeatureDeriver;
 import org.ehu.dedupe.io.CsvDataSetWriter;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -33,5 +34,9 @@ public class DataSet<K extends Comparable<K>> {
 
     public void writeToCsv(String datasetFileName) throws IOException {
         new CsvDataSetWriter(featureDerivers).writeToCsv(rows, datasetFileName);
+    }
+
+    public void writeToCsv(BufferedWriter bufferedWriter) throws IOException {
+        new CsvDataSetWriter(featureDerivers).writeToCsv(rows, bufferedWriter);
     }
 }

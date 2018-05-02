@@ -20,7 +20,7 @@ public class Buckets<I> {
     private final Map<Integer, Set<I>> buckets;
 
     public Buckets(Map<I, Set<Integer>> inverseBuckets) {
-        this.inverseBuckets = inverseBuckets;
+        this.inverseBuckets = new HashMap<>(inverseBuckets);
         this.buckets = new HashMap<>();
         update(inverseBuckets);
     }

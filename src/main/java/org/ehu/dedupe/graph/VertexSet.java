@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -126,7 +127,7 @@ public class VertexSet<T> {
         return vertexes.stream().map(Vertex::getId).collect(Collectors.toSet());
     }
 
-    public static <T> Collection<VertexSet<T>> normalize(VertexSet<T> vertexSet, Map<Pair<T, T>, Double> weights) {
+    public static <T> Collection<VertexSet<T>> normalize(VertexSet<T> vertexSet, Map<Pair<T, T>, Double> weights, Predicate<VertexSet<T>> predicate) {
         EdgeWeightedGraph edgeWeightedGraph = new EdgeWeightedGraph(vertexSet.size());
         List<Vertex<T>> vertices = new ArrayList<>(vertexSet.getVertexes());
         Map<Vertex<T>, Integer> vertexMap = IntStream.range(0, vertices.size()).boxed().collect(Collectors.toMap(vertices::get, Function.identity()));
@@ -154,8 +155,8 @@ public class VertexSet<T> {
         purge(right);
 
         Collection<VertexSet<T>> sets = new HashSet<>();
-        update(weights, left, sets);
-        update(weights, right, sets);
+        update(weights, left, sets, predicate);
+        update(weights, right, sets, predicate);
         return sets;
     }
 
@@ -171,10 +172,9 @@ public class VertexSet<T> {
         }
     }
 
-    private static <T> void update(Map<Pair<T, T>, Double> weights, VertexSet<T> vertexSet, Collection<VertexSet<T>> sets) {
-        Set<VertexSet<T>> vertexSets = bronKerbosch(vertexSet);
-        if (vertexSets.size() > 1) {
-            sets.addAll(normalize(vertexSet, weights));
+    private static <T> void update(Map<Pair<T, T>, Double> weights, VertexSet<T> vertexSet, Collection<VertexSet<T>> sets, Predicate<VertexSet<T>> predicate) {
+        if (predicate.test(vertexSet)) {
+            sets.addAll(normalize(vertexSet, weights, predicate));
         } else {
             sets.add(vertexSet);
         }
