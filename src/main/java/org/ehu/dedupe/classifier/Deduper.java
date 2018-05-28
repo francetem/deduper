@@ -66,7 +66,6 @@ public class Deduper {
     }
 
     private PairResolution doPairResolution(double threshold, Classifier classifier) {
-        Map<String, Set<String>> duplicates = new HashMap<>();
 
         Iterator<Instance> iterator = dataSet.iterator();
 
@@ -76,13 +75,10 @@ public class Deduper {
 
             String id1 = getId(instance, 0);
             String id2 = getId(instance, 1);
-            Set<String> duplicates1 = duplicates.computeIfAbsent(id1, x -> new HashSet<>());
 
             if (Objects.equals(id1, id2)) {
                 continue;
             }
-
-            Set<String> duplicates2 = duplicates.computeIfAbsent(id2, x -> new HashSet<>());
 
             double value;
             try {
@@ -95,7 +91,20 @@ public class Deduper {
             weights.put(new ImmutablePair<>(id1, id2), value);
             weights.put(new ImmutablePair<>(id2, id1), value);
 
-            if (value >= threshold) {
+        }
+
+        return doPairResolution(threshold, weights);
+    }
+
+    public PairResolution doPairResolution(double threshold, Map<Pair<String, String>, Double> weights) {
+        Map<String, Set<String>> duplicates = new HashMap<>();
+        for(Map.Entry<Pair<String, String>, Double> entry : weights.entrySet()){
+            Pair<String, String> key = entry.getKey();
+            String id1 = key.getLeft();
+            String id2 = key.getRight();
+            Set<String> duplicates1 = duplicates.computeIfAbsent(id1, x -> new HashSet<>());
+            Set<String> duplicates2 = duplicates.computeIfAbsent(id2, x -> new HashSet<>());
+            if (entry.getValue() >= threshold) {
                 duplicates1.add(id2);
                 duplicates2.add(id1);
             }

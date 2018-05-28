@@ -1,5 +1,6 @@
 package org.ehu.dedupe.classifier.weka;
 
+import org.ehu.dedupe.DataSet;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -11,11 +12,17 @@ import weka.core.converters.CSVLoader;
 import weka.core.converters.ConverterUtils;
 import weka.filters.unsupervised.attribute.RemoveByName;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -91,6 +98,14 @@ public class WekaUtils {
     public static Instances readArff(String pathname) throws Exception {
         ConverterUtils.DataSource source = new ConverterUtils.DataSource(pathname);
         return source.getDataSet();
+    }
+
+    public static Instances getInstances(DataSet dataSet) throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream, Charset.forName("UTF-8")));
+        dataSet.writeToCsv(bufferedWriter);
+        bufferedWriter.close();
+        return WekaUtils.getCsvInstances(new BufferedInputStream(new ByteArrayInputStream(stream.toByteArray())));
     }
 
     public static void saveModel(AbstractClassifier classifier, ObjectOutputStream oos) throws IOException {
