@@ -136,8 +136,10 @@ public class VertexSet<T> {
                 if (!vertexMap.containsKey(next)) {
                     continue;
                 }
-                ImmutablePair<T, T> key = new ImmutablePair<>(vertex.getId(), next.getId());
-                edgeWeightedGraph.addEdge(new Edge(vertexMap.get(vertex), vertexMap.get(next), weights.get(key)));
+                T id1 = vertex.getId();
+                T id2 = next.getId();
+                Double weight = getWeight(weights, id1, id2);
+                edgeWeightedGraph.addEdge(new Edge(vertexMap.get(vertex), vertexMap.get(next), weight));
             }
         }
         GlobalMincut globalMincut = new GlobalMincut(edgeWeightedGraph);
@@ -158,6 +160,14 @@ public class VertexSet<T> {
         update(weights, left, sets, predicate);
         update(weights, right, sets, predicate);
         return sets;
+    }
+
+    public static <T> Double getWeight(Map<Pair<T, T>, Double> weights, T id1, T id2) {
+        ImmutablePair<T, T> key = new ImmutablePair<>(id1, id2);
+        if (!weights.containsKey(key)) {
+            key = new ImmutablePair<>(id2, id1);
+        }
+        return weights.get(key);
     }
 
     private static <T> void purge(VertexSet<T> vertexSet) {

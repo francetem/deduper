@@ -96,7 +96,7 @@ public class Deduper {
         return doPairResolution(threshold, weights);
     }
 
-    public PairResolution doPairResolution(double threshold, Map<Pair<String, String>, Double> weights) {
+    public static PairResolution doPairResolution(double threshold, Map<Pair<String, String>, Double> weights) {
         Map<String, Set<String>> duplicates = new HashMap<>();
         for(Map.Entry<Pair<String, String>, Double> entry : weights.entrySet()){
             Pair<String, String> key = entry.getKey();
