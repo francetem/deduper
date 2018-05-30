@@ -1,25 +1,23 @@
 package org.ehu.dedupe.metrics.distance;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ehu.dedupe.data.Buckets;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 public class GMD {
 
-    private final Collection<Collection<Collection>> splits = new ArrayList<>();
-    private final Collection<Collection<Collection>> merges = new ArrayList<>();
-
-    public <I> BigDecimal cost(Buckets<I> er, Buckets<I> gt) {
+    public <I> GmdCost<I> cost(Buckets<I> er, Buckets<I> gt) {
         return cost(er, gt, this::split, this::merge);
     }
 
@@ -46,68 +44,66 @@ public class GMD {
      * @param <I>    type of elements
      * @return The GMD cost from er to gt
      */
-    public <I> BigDecimal cost(final Buckets<I> er, final Buckets<I> gt, Function<Collection<Collection<I>>, BigDecimal> fSplit, Function<Collection<Collection<I>>, BigDecimal> fMerge) {
+    public <I> GmdCost<I> cost(final Buckets<I> er, final Buckets<I> gt, Function<Collection<Collection<I>>, BigDecimal> fSplit, Function<Collection<Collection<I>>, BigDecimal> fMerge) {
 
-        Set<I> missingEr = gt.clusters().stream().flatMap(Collection::stream).filter(x -> !er.contains(x)).collect(Collectors.toSet());
+        List<Set<I>> erClusters = new ArrayList<>(er.clusters());
+        List<Set<I>> gtClusters = new ArrayList<>(gt.clusters());
 
-        Map<Integer, Collection<Collection<I>>> merging = new HashMap<>();
-        Collection<Collection<Collection<I>>> splitting = new ArrayList<>();
-        Collection<Set<I>> clusters = new ArrayList<>(er.clusters());
-        clusters.addAll(missingEr.stream().map(x -> Stream.of(x).collect(Collectors.toSet())).collect(Collectors.toSet()));
-        for (Set<I> es : clusters) {
-            Set<Integer> tIds = intersectingIds(gt, es);
+        Set<I> missingEr = gtClusters.stream()
+                .flatMap(Collection::stream)
+                .filter(x -> !er.contains(x))
+                .collect(Collectors.toSet());
 
-            if (tIds.size() > 1) {
-                Collection<Collection<I>> currentSplits = new ArrayList<>();
-                for (Integer id : tIds) {
-                    Set<I> set = gt.get(id);
-                    Collection<I> intersection = CollectionUtils.intersection(set, es);
-                    currentSplits.add(intersection);
-                }
-                splitting.add(currentSplits);
-            }
+        Set<Set<I>> missingAsClusters = missingEr.stream().map(Collections::singleton).collect(Collectors.toSet());
+        erClusters.addAll(missingAsClusters);
 
-            for (Integer id : tIds) {
-                Set<I> set = gt.get(id);
-                Collection<I> intersection = CollectionUtils.intersection(set, es);
-                if (intersection.size() > 0 && intersection.size() < set.size()) {
-                    if (!merging.containsKey(id)) {
-                        merging.put(id, new ArrayList<>());
-                    }
-                    merging.get(id).add(intersection);
-                }
-            }
-        }
+        return cost(fSplit, fMerge, erClusters, gtClusters);
+    }
 
-        merges.addAll(new HashSet(merging.values()));
-        splits.addAll(new HashSet(splitting));
-        BigDecimal mergeCost = merging.values().stream()
-                .map(fMerge)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    private <T> GmdCost<T> cost(Function<Collection<Collection<T>>, BigDecimal> fSplit, Function<Collection<Collection<T>>, BigDecimal> fMerge, List<Set<T>> erClusters, List<Set<T>> gtClusters) {
+        Map<T, Integer> indexedGtElements = index(gtClusters);
 
-        BigDecimal splitCost = splitting.stream()
+        final Collection<Collection<Collection<T>>> splits = new ArrayList<>();
+
+        Collection<List<Map.Entry<ImmutablePair<Integer, Integer>, List<T>>>> splitPartitions = IntStream.range(0, erClusters.size())
+                .boxed()
+                .map(x -> erClusters.get(x).stream().collect(Collectors.groupingBy(y -> new ImmutablePair<>(x, indexedGtElements.get(y)))))
+                .peek(x -> updateSplits(splits, x))
+                .flatMap(x -> x.entrySet().stream())
+                .collect(Collectors.groupingBy(x -> x.getKey().getRight()))
+                .values();
+
+        Collection<Collection<Collection<T>>> merges = splitPartitions
+                .stream()
+                .filter(x -> x.size() > 1)
+                .map(x -> new ArrayList<Collection<T>>(x.stream().map(Map.Entry::getValue).collect(Collectors.toList())))
+                .collect(Collectors.toList());
+
+        BigDecimal splitCost = splits.stream()
                 .map(fSplit)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return mergeCost.add(splitCost);
+        BigDecimal mergeCost = merges.stream()
+                .map(fMerge)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal cost = splitCost.add(mergeCost);
+
+        return new GmdCost<>(splits, merges, cost);
     }
 
-    public <I> Set<Integer> intersectingIds(Buckets<I> gt, Set<I> es) {
-        Set<Integer> tIds = new HashSet<>();
-        for (I t : es) {
-            if (gt.contains(t)) {
-                Collection<Integer> containing = gt.containing(t);
-                tIds.addAll(containing);
-            }
+    private <I> void updateSplits(Collection<Collection<Collection<I>>> splits, Map<ImmutablePair<Integer, Integer>, List<I>> x) {
+        if (x.size() > 1) {
+            splits.add(new ArrayList<>(x.values()));
         }
-        return tIds;
     }
 
-    public Collection<Collection<Collection>> getSplits() {
-        return splits;
-    }
-
-    public Collection<Collection<Collection>> getMerges() {
-        return merges;
+    private <I> Map<I, Integer> index(List<Set<I>> gtClusters) {
+        Map<I, Integer> indexes = new HashMap<>();
+        for (int i = 0; i < gtClusters.size(); i++) {
+            final int index = i;
+            gtClusters.get(i).forEach(x -> indexes.put(x, index));
+        }
+        return indexes;
     }
 }

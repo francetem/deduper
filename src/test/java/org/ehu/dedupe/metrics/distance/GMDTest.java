@@ -24,7 +24,7 @@ public class GMDTest {
         Set<String> cluster3 = Stream.of("r1", "r2", "r3").collect(Collectors.toSet());
         Set<String> cluster4 = Stream.of("r4", "r5", "r6").collect(Collectors.toSet());
 
-        BigDecimal cost = gmd.cost(Buckets.from(Arrays.asList(cluster1, cluster2)), Buckets.from(Arrays.asList(cluster3, cluster4)));
+        BigDecimal cost = gmd.cost(Buckets.from(Arrays.asList(cluster1, cluster2)), Buckets.from(Arrays.asList(cluster3, cluster4))).getCost();
         assertTrue(cost.compareTo(BigDecimal.valueOf(4)) == 0);
     }
 
@@ -40,10 +40,12 @@ public class GMDTest {
         Buckets<String> bucket1 = Buckets.from(Arrays.asList(cluster1, cluster2, cluster3));
         Buckets<String> bucket2 = Buckets.from(Collections.singletonList(cluster4));
 
-        gmd.cost(bucket1, bucket2);
-        assertEquals(gmd.getMerges().size(), 1);
+        GmdCost<String> cost = gmd.cost(bucket1, bucket2);
+        assertEquals(cost.getMerges().size(), 1);
+        assertEquals(cost.getSplits().size(), 0);
 
-        gmd.cost(bucket2, bucket1);
-        assertEquals(gmd.getSplits().size(), 1);
+        cost = gmd.cost(bucket2, bucket1);
+        assertEquals(cost.getSplits().size(), 1);
+        assertEquals(cost.getMerges().size(), 0);
     }
 }
