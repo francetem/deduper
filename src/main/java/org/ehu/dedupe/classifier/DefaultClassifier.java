@@ -2,6 +2,7 @@ package org.ehu.dedupe.classifier;
 
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
+import weka.core.Instances;
 
 import java.util.logging.Logger;
 
@@ -17,6 +18,14 @@ public class DefaultClassifier implements Classifier {
         this.classifiers = classifiers;
         this.partialOnError = partialOnError;
         this.indexOfDuplicateClassValue = indexOfDuplicateClassValue;
+    }
+
+    public DefaultClassifier(Instances dataSet, boolean partialOnError, AbstractClassifier... classifiers) {
+        this(partialOnError, getTrueIndexForClassAttribute(dataSet), classifiers);
+    }
+
+    public static int getTrueIndexForClassAttribute(Instances dataSet) {
+        return dataSet.classAttribute().indexOfValue("true");
     }
 
     public boolean isPartialOnError() {
@@ -41,7 +50,6 @@ public class DefaultClassifier implements Classifier {
         }
 
         if (isPartialOnError() && count == 0 || !isPartialOnError() && count < classifiers.length) {
-
             throw new ClassifierException("no classification for: " + instance.stringValue(0) + " " + instance.stringValue(1));
         }
 

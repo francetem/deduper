@@ -59,6 +59,9 @@
                     <targetDirectory>${basedir}/target</targetDirectory>
                     <minimumTokens>100</minimumTokens>
                     <linkXRef>false</linkXRef>
+                    <analysisCache>true</analysisCache> <!-- enable incremental analysis -->
+                    <analysisCacheLocation>${project.build.directory}/pmd/pmd.cache
+                    </analysisCacheLocation> <!-- Optional: points to this location by default -->
                 </configuration>
             </plugin>
             <plugin>
@@ -116,7 +119,7 @@
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.76</minimum>
+                                            <minimum>0.75</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -131,7 +134,7 @@
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.50</minimum>
+                                            <minimum>0.47</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

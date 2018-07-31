@@ -34,14 +34,14 @@ public class Deriving<I extends Comparable<I>, D extends DataRow<I>> {
         return y -> calculate(featureCalculators, diReflectionDatarowFactory, buckets, y);
     }
 
-    private static <I extends Comparable<I>, S extends Source<I>, D extends DataRow<I>> Stream<? extends CalculationResult<FeatureCalculator, D>> calculate(List<? extends FeatureCalculator> featureCalculators, DatarowFactory<D, I> diReflectionDatarowFactory, Buckets<I> buckets, Pair<S, S> y) {
+    private static <I extends Comparable<I>, S extends Source<I>, D extends DataRow<I>> Stream<? extends CalculationResult<FeatureCalculator, D>> calculate(List<? extends FeatureCalculator> featureCalculators, DatarowFactory<D, I> datarowFactory, Buckets<I> buckets, Pair<S, S> y) {
         S left = y.getLeft();
         I id1 = left.getId();
         S right = y.getRight();
         I id2 = right.getId();
 
         try {
-            D dataRow = diReflectionDatarowFactory.create(id1, id2, buckets.isSameBucket(id1, id2));
+            D dataRow = datarowFactory.create(id1, id2, buckets.isSameBucket(id1, id2));
             return featureCalculators.stream().parallel().map(feature -> feature.calculate(left, right, dataRow));
         } catch (DataRowException e) {
             throw new InvalidDataRowConstruction(e);

@@ -3,7 +3,6 @@ package org.ehu.dedupe.classifier;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ehu.dedupe.data.Buckets;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -22,31 +21,12 @@ public class Deduper {
     private final Instances dataSet;
     private final Classifier classifier;
 
-    /**
-     * @param dataSet                    contains all the comparisons to extract the clusters
-     * @param classifiers                the list of classifiers
-     * @param partialOnError             if true while there is one classifier able to classify we will use the classification, otherwise the result will be ignored
-     * @param indexOfDuplicateClassValue index of the duped class value
-     */
-    public Deduper(Instances dataSet, boolean partialOnError, int indexOfDuplicateClassValue, AbstractClassifier... classifiers) {
-        this.dataSet = dataSet;
-        this.classifier = new DefaultClassifier(partialOnError, indexOfDuplicateClassValue, classifiers);
-    }
-
     public Deduper(Instances dataSet, Classifier classifier) {
         this.dataSet = dataSet;
         this.classifier = classifier;
     }
 
-    public Deduper(Instances dataSet, boolean partialOnError, AbstractClassifier... classifiers) {
-        this(dataSet, partialOnError, getTrueIndexForClassAttribute(dataSet), classifiers);
-    }
-
-    public Deduper(Instances dataSet, AbstractClassifier... classifiers) {
-        this(dataSet, false, getTrueIndexForClassAttribute(dataSet), classifiers);
-    }
-
-    public Buckets<String> dedup() throws Exception {
+    public Buckets<String> dedup() {
         return dedup(0.5);
     }
 
@@ -117,15 +97,10 @@ public class Deduper {
         String id1;
         if (instance.attribute(indexId).isNumeric()) {
             id1 = String.valueOf(instance.value(indexId));
-            //id2 = String.valueOf(instance.value(1));
         } else {
             id1 = instance.stringValue(indexId);
-            // id2 = instance.stringValue(1);
         }
         return id1;
     }
 
-    public static int getTrueIndexForClassAttribute(Instances dataSet) {
-        return dataSet.classAttribute().indexOfValue("true");
-    }
 }

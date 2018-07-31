@@ -28,26 +28,23 @@ public class DeduperTest {
     }
 
     @Test
-    public void testDedup() throws Exception {
-        Deduper deduper = new Deduper(dataSet, classifier);
+    public void testDedup() {
+        Deduper deduper = new Deduper(dataSet, new DefaultClassifier(dataSet, true, classifier));
         Buckets<String> dedup = deduper.dedup();
 
         Collection<Set<String>> clusters = dedup.clusters();
         int size = clusters.size();
         assertFalse(clusters.isEmpty());
 
-        deduper = new Deduper(dataSet, classifier, classifier);
+        deduper = new Deduper(dataSet, new DefaultClassifier(dataSet, true, classifier, classifier));
         dedup = deduper.dedup();
         assertEquals(size, dedup.clusters().size());
     }
 
     @Test
-    public void testDedupForce() throws Exception {
-        Deduper deduper = new Deduper(dataSet, true, classifier);
+    public void testDedupForce() {
+        Deduper deduper = new Deduper(dataSet, new DefaultClassifier(dataSet, true, classifier));
         Buckets<String> dedup = deduper.dedup(0.5);
-
         assertFalse(dedup.clusters().isEmpty());
-
     }
-
 }
