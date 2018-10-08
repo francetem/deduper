@@ -1,6 +1,6 @@
 # deduper
 
-deduper is a set of functionalities that helps the user to implement a deduplication process.
+deduper is a set of functionalities that helps the user to implement a deduplication process. Based on some implementation details from: https://addi.ehu.es/handle/10810/28984?locale-attribute=en
 
 ## Blocking, derive and dataset creation
 
